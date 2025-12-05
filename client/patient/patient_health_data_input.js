@@ -23,6 +23,7 @@ document.getElementById('healthForm').addEventListener('submit', async (e) => {
 async function handleSubmitHealth() {
     const bp = document.getElementById('bpInput').value;
     const sugar = document.getElementById('sugarInput').value;
+    const drinking = document.getElementById('drinkingInput').value === "true";
     const smoking = document.getElementById('smokingInput').value === "true";
 
     if (!bp || !sugar) {
@@ -32,6 +33,7 @@ async function handleSubmitHealth() {
 
     const currentUserId = localStorage.getItem('currentUserId');
 
+    // 프론트에서 백엔드로 요청하는 데이터
     const payload = {
         user_id: currentUserId,
         sex: "M",
@@ -41,11 +43,13 @@ async function handleSubmitHealth() {
         systolic_bp: parseInt(bp),
         diastolic_bp: 80,
         glucose_level: parseInt(sugar),
+        drinking: drinking ? 10 : 0,
         smoking: smoking ? 10 : 0,
         stroke_history: false,
         hypertension: false,
         heart_disease: false,
         diabetes: false,
+        drinking_status: drinking
         smoking_status: smoking
     };
 
@@ -59,11 +63,11 @@ async function handleSubmitHealth() {
         const data = await res.json();
 
         if (res.ok) {
-            // 결과 저장
+            // 건강 데이터 입력 저장
             localStorage.setItem('riskLevel', data.risk_level || "MEDIUM");
             
-            // 결과 페이지로 이동
-            window.location.href = 'result.html';
+            // 환자 홈 페이지로 이동
+            window.location.href = 'patient_home.html';
         } else {
             alert("데이터 처리 오류");
         }
