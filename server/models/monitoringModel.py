@@ -14,6 +14,9 @@ class MonitoringRequestDB(BaseModel):
     status: MonitoringStatus # PENDING, APPROVED, REJECTED
     created_at: datetime = Field(default_factory=datetime.now)
     responded_at: Optional[datetime] = None  # 응답 시간
+    
+    class Config:
+        populate_by_name = True  # id와 _id 모두 허용
 
 class MonitoringRelationDB(BaseModel):
     """승인된 모니터링 관계 DB 모델 (활성 관계만 저장)"""
@@ -22,3 +25,6 @@ class MonitoringRelationDB(BaseModel):
     monitor_id: str          # 모니터링하는 사용자 ID
     request_id: str          # 원본 요청 ID (참조용)
     granted_at: datetime = Field(default_factory=datetime.now)
+    
+    class Config:
+        populate_by_name = True  # id와 _id 모두 허용
