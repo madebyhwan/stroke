@@ -1,0 +1,33 @@
+/* 구글 폰트 적용 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f9fafb; /* gray-50 */
+}
+
+/* 위험도 색상 */
+.risk-HIGH { 
+    color: #dc2626; 
+    font-weight: bold; 
+}
+
+.risk-MEDIUM { 
+    color: #f59e0b; 
+    font-weight: bold; 
+}
+
+.risk-LOW { 
+    color: #10b981; 
+    font-weight: bold; 
+}
+
+/* 스크롤바 숨기기 */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
