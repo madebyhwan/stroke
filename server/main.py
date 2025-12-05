@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from server.controller import healthController, memoController, monitoringController, userController
+from controller import healthController, memoController, monitoringController, userController
 from contextlib import asynccontextmanager
 
 # MongoDB 설정 (로컬 DB 기준)
@@ -34,8 +34,8 @@ app.add_middleware(
 # 컨트롤러 등록 (라우터 연결)
 app.include_router(userController.router, prefix="/users", tags=["Users"])
 app.include_router(healthController.router, prefix="/health", tags=["Health"])
-app.include_router(memoController.router, prefix="/memos", tags=["Memos"])
-app.include_router(monitoringController.router, prefix="/monitoring", tags=["Monitoring"])
+# app.include_router(memoController.router, prefix="/memos", tags=["Memos"])
+# app.include_router(monitoringController.router, prefix="/monitoring", tags=["Monitoring"])
 
 # 루트 엔드포인트
 @app.get("/")

@@ -25,7 +25,7 @@ class MonitoringRequestResponse(BaseModel):
     requester_role: str         # 요청자 역할 (DOCTOR/CAREGIVER)
     status: MonitoringStatus    # PENDING, APPROVED, REJECTED
     created_at: datetime        # 요청 시간
-    responded_at: datetime      # 응답 시간
+    responded_at: Optional[datetime]    # 응답 시간
 
 class MonitoringApproval(BaseModel):
     """모니터링 승인/거부 처리"""

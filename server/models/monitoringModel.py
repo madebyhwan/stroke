@@ -3,7 +3,7 @@
 
 from pydantic import BaseModel, Field
 from datetime import datetime
-from server.schemas.monitoringSchema import MonitoringStatus
+from schemas.monitoringSchema import MonitoringStatus
 from typing import Optional
 
 class MonitoringRequestDB(BaseModel):
