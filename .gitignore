@@ -1,6 +1,7 @@
 .env
 .DS_Store
 **/.DS_Store
+db_run.sh
 
 # Python
 __pycache__/
