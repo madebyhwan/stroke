@@ -263,14 +263,30 @@
 ### 1. 모니터링 요청 생성
 - **Endpoint**: `POST /monitoring/request`
 - **설명**: 의사/보호자가 환자에게 모니터링 요청
-- **Request Body**:
+- **Request Body**: `MonitoringRequestCreate`
   ```json
   {
-    "patient_id": "patient123",
-    "message": "건강 상태를 모니터링하고 싶습니다"
+    "patient_id": "patient001",
+    "requester_id": "doctor001"
   }
   ```
 - **Response**: `MonitoringRequestResponse` (201 Created)
+  ```json
+  {
+    "id": "req_123",
+    "patient_id": "patient001",
+    "patient_name": "김환자",
+    "requester_id": "doctor001",
+    "requester_name": "이의사",
+    "requester_role": "DOCTOR",
+    "status": "PENDING",
+    "created_at": "2025-12-05T10:00:00",
+    "responded_at": null
+  }
+  ```
+- **Error**:
+  - `400`: 환자/요청자를 찾을 수 없음, 이미 모니터링 관계가 존재함
+  - `500`: 요청 생성 실패
 
 ### 2. 대기 중인 요청 조회 (환자용)
 - **Endpoint**: `GET /monitoring/requests/pending/{patient_id}`
@@ -278,11 +294,26 @@
 - **Path Parameter**:
   - `patient_id`: 환자 아이디
 - **Response**: `List[MonitoringRequestResponse]` (200 OK)
+  ```json
+  [
+    {
+      "id": "req_123",
+      "patient_id": "patient001",
+      "patient_name": "",
+      "requester_id": "doctor001",
+      "requester_name": "이의사",
+      "requester_role": "DOCTOR",
+      "status": "PENDING",
+      "created_at": "2025-12-05T10:00:00",
+      "responded_at": null
+    }
+  ]
+  ```
 
 ### 3. 모니터링 요청 승인/거부
 - **Endpoint**: `POST /monitoring/approve`
 - **설명**: 환자가 모니터링 요청 승인 또는 거부
-- **Request Body**:
+- **Request Body**: `MonitoringApproval`
   ```json
   {
     "request_id": "req_123",
@@ -290,25 +321,75 @@
   }
   ```
 - **Response**: `MonitoringRequestResponse` (200 OK)
+  ```json
+  {
+    "id": "req_123",
+    "patient_id": "patient001",
+    "patient_name": "김환자",
+    "requester_id": "doctor001",
+    "requester_name": "이의사",
+    "requester_role": "DOCTOR",
+    "status": "APPROVED",
+    "created_at": "2025-12-05T10:00:00",
+    "responded_at": "2025-12-05T11:00:00"
+  }
+  ```
+- **Error**:
+  - `400`: 요청을 찾을 수 없음, 이미 처리된 요청
+  - `500`: 요청 처리 실패
+- **참고**:
+  - `approved: true` 시 자동으로 `monitoring_relations`에 관계 생성
+  - `approved: false` 시 요청만 REJECTED로 변경
 
-### 4. 모니터링 관계 조회
+### 4. 모니터링 관계 조회 (환자용)
 - **Endpoint**: `GET /monitoring/relations/{patient_id}`
 - **설명**: 특정 환자의 승인된 모니터링 관계 목록
 - **Path Parameter**:
   - `patient_id`: 환자 아이디
 - **Response**: `List[MonitoringRelationResponse]` (200 OK)
+  ```json
+  [
+    {
+      "id": "rel_456",
+      "patient_id": "patient001",
+      "patient_name": "",
+      "monitor_id": "doctor001",
+      "monitor_name": "이의사",
+      "monitor_role": "DOCTOR",
+      "granted_at": "2025-12-05T11:00:00"
+    }
+  ]
+  ```
 
-### 5. 내가 모니터링하는 환자 목록
+### 5. 내가 모니터링하는 환자 목록 (의사/보호자용)
 - **Endpoint**: `GET /monitoring/my-patients/{monitor_id}`
 - **설명**: 의사/보호자가 모니터링 중인 환자 목록
 - **Path Parameter**:
   - `monitor_id`: 의사/보호자 아이디
 - **Response**: `List[MonitoringRelationResponse]` (200 OK)
+  ```json
+  [
+    {
+      "id": "rel_456",
+      "patient_id": "patient001",
+      "patient_name": "김환자",
+      "monitor_id": "doctor001",
+      "monitor_name": "",
+      "monitor_role": "",
+      "granted_at": "2025-12-05T11:00:00"
+    }
+  ]
+  ```
 
 ### 6. 모니터링 관계 해제
 - **Endpoint**: `DELETE /monitoring/relation/{relation_id}`
 - **설명**: 승인된 모니터링 관계 해제
+- **Path Parameter**:
+  - `relation_id`: 관계 ID
 - **Response**: `204 No Content`
+- **Error**:
+  - `404`: 모니터링 관계를 찾을 수 없음
+  - `500`: 관계 해제 실패
 
 ---
 
@@ -532,6 +613,50 @@ Content-Type: application/json
 DELETE {{BASE_URL}}/health/records/{record_id}
 ```
 
+#### 8️⃣ 모니터링 시스템 테스트
+```bash
+# 8-1. 의사 회원가입
+POST {{BASE_URL}}/users/register
+Content-Type: application/json
+
+{
+  "id": "doctor001",
+  "password": "doc1234",
+  "name": "이의사",
+  "role": "DOCTOR"
+}
+
+# 8-2. 모니터링 요청 (의사 → 환자)
+POST {{BASE_URL}}/monitoring/request
+Content-Type: application/json
+
+{
+  "patient_id": "patient001",
+  "requester_id": "doctor001"
+}
+
+# 8-3. 대기 중인 요청 확인 (환자)
+GET {{BASE_URL}}/monitoring/requests/pending/patient001
+
+# 8-4. 요청 승인 (환자)
+POST {{BASE_URL}}/monitoring/approve
+Content-Type: application/json
+
+{
+  "request_id": "req_123",
+  "approved": true
+}
+
+# 8-5. 내가 모니터링하는 환자 목록 (의사)
+GET {{BASE_URL}}/monitoring/my-patients/doctor001
+
+# 8-6. 환자의 모니터링 관계 목록 (환자)
+GET {{BASE_URL}}/monitoring/relations/patient001
+
+# 8-7. 관계 해제
+DELETE {{BASE_URL}}/monitoring/relation/{relation_id}
+```
+
 ### Postman Collection JSON
 
 아래 내용을 복사하여 Postman에서 Import하세요:
@@ -645,13 +770,82 @@ DELETE {{BASE_URL}}/health/records/{record_id}
           }
         }
       ]
+    },
+    {
+      "name": "Monitoring",
+      "item": [
+        {
+          "name": "의사 회원가입",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/users/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"doctor001\",\n  \"password\": \"doc1234\",\n  \"name\": \"이의사\",\n  \"role\": \"DOCTOR\"\n}"
+            }
+          }
+        },
+        {
+          "name": "모니터링 요청 생성",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/monitoring/request",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": \"{{user_id}}\",\n  \"requester_id\": \"doctor001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "대기 중인 요청 조회",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/monitoring/requests/pending/{{user_id}}"
+          }
+        },
+        {
+          "name": "요청 승인",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": "{{BASE_URL}}/monitoring/approve",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request_id\": \"{request_id}\",\n  \"approved\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "내가 모니터링하는 환자",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/monitoring/my-patients/doctor001"
+          }
+        },
+        {
+          "name": "환자의 모니터링 관계",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/monitoring/relations/{{user_id}}"
+          }
+        },
+        {
+          "name": "관계 해제",
+          "request": {
+            "method": "DELETE",
+            "url": "{{BASE_URL}}/monitoring/relation/{relation_id}"
+          }
+        }
+      ]
     }
   ]
 }
 ```
 
 ### 테스트 순서
-1. **회원가입** → 새 사용자 생성
+1. **회원가입** → 환자 계정 생성 (patient001)
 2. **로그인** → 인증 확인
 3. **사용자 정보 수정** → 이름 또는 비밀번호 변경 (선택)
 4. **건강 프로필 수정** → 기본 건강 정보 설정
@@ -659,3 +853,9 @@ DELETE {{BASE_URL}}/health/records/{record_id}
 6. **건강 측정 데이터 생성** (여러 번) → 시계열 데이터 축적
 7. **사용자 측정 데이터 조회** → 모든 측정 기록 확인
 8. **최신 측정 데이터 조회** → 가장 최근 기록만 확인
+9. **의사 회원가입** → 의사 계정 생성 (doctor001)
+10. **모니터링 요청** → 의사가 환자에게 요청
+11. **대기 중인 요청 조회** → 환자가 요청 확인
+12. **요청 승인** → 환자가 승인
+13. **모니터링 관계 확인** → 양방향 확인
+14. **관계 해제** → 모니터링 종료 (선택)

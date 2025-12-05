@@ -38,3 +38,6 @@ class UserDB(BaseModel):
     diabetes: bool = False
     smoking_history: smokingEnum = smokingEnum.NON_SMOKER
     measured_at: datetime = Field(default_factory=datetime.now)
+    
+    class Config:
+        populate_by_name = True  # id와 _id 모두 허용
