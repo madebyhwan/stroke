@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}건강 정보 입력 - 뇌졸중 예방 시스템{% endblock %}
+
+{% set active_menu = 'health-input' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">건강 정보 입력</h1>
+
+    <!-- 선택 카드 -->
+    <div class="grid grid-cols-2 gap-8">
+        
+        <!-- 기본 정보 입력 카드 -->
+        <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-8 hover:border-teal-500 hover:shadow-lg transition-all cursor-pointer" onclick="goToBasicInfo()">
+            <div class="flex justify-center mb-6">
+                <div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="user-circle" class="w-10 h-10 text-teal-600"></i>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">기본 정보 입력</h2>
+            
+            <div class="space-y-3 text-gray-600">
+                <p class="text-sm leading-relaxed">변경이 거의 없는 정적 정보를 입력합니다.</p>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-teal-400 rounded-full mt-1.5"></span>
+                        <span>생년월일</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-teal-400 rounded-full mt-1.5"></span>
+                        <span>성별</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-teal-400 rounded-full mt-1.5"></span>
+                        <span>기저 질환 (심장병, 당뇨병, 고혈압 등)</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-teal-400 rounded-full mt-1.5"></span>
+                        <span>흡연, 음주 여부</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-teal-400 rounded-full mt-1.5"></span>
+                        <span>키</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-100">
+                <div class="bg-teal-50 rounded-lg p-3">
+                    <p class="text-xs text-teal-700 font-medium">💡 정보를 수정하면 기존 정보가 업데이트됩니다</p>
+                </div>
+            </div>
+
+            <button class="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                <span>입력하기</span>
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- 가변 정보 입력 카드 -->
+        <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-100 p-8 hover:border-teal-500 hover:shadow-lg transition-all cursor-pointer" onclick="goToVariableInfo()">
+            <div class="flex justify-center mb-6">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="activity" class="w-10 h-10 text-blue-600"></i>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">가변 정보 입력</h2>
+            
+            <div class="space-y-3 text-gray-600">
+                <p class="text-sm leading-relaxed">주기적으로 측정하는 건강 지표를 입력합니다.</p>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5"></span>
+                        <span>혈압 (수축기, 이완기)</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5"></span>
+                        <span>혈당</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5"></span>
+                        <span>몸무게</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-100">
+                <div class="bg-blue-50 rounded-lg p-3">
+                    <p class="text-xs text-blue-700 font-medium">💡 입력시 새로운 기록이 추가됩니다</p>
+                </div>
+            </div>
+
+            <button class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                <span>입력하기</span>
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // 페이지 로드 시 사용자 정보 확인
+    window.addEventListener('DOMContentLoaded', () => {
+        const userId = localStorage.getItem('currentUserId');
+        const userName = localStorage.getItem('currentUserName');
+        
+        if (!userId || !userName) {
+            alert('로그인이 필요합니다.');
+            window.location.href = '/login';
+            return;
+        }
+        
+        document.getElementById('profileName').textContent = `${userName} 님`;
+        document.getElementById('profileInitial').textContent = userName.substring(0, 2);
+    });
+
+    // 기본 정보 입력 페이지로 이동
+    function goToBasicInfo() {
+        window.location.href = '/patient/basic-info';
+    }
+
+    // 가변 정보 입력 페이지로 이동
+    function goToVariableInfo() {
+        window.location.href = '/patient/variable-info';
+    }
+</script>
+{% endblock %}

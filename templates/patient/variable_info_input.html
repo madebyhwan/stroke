@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}가변 정보 입력 - 뇌졸중 예방 시스템{% endblock %}
+
+{% set active_menu = 'health-input' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        
+        <div class="p-6 border-b border-gray-100 bg-teal-50/50">
+            <h2 class="text-2xl font-bold text-gray-800">가변 정보 입력</h2>
+            <p class="text-gray-500 text-sm mt-1">오늘의 건강 데이터를 입력합니다</p>
+        </div>
+
+        <form id="variableInfoForm" class="p-8 space-y-6">
+            
+            <!-- 현재 시각 표시 -->
+            <div class="bg-teal-50 p-4 rounded-xl">
+                <p class="text-sm text-gray-600">측정 시각: <span id="currentDateTime" class="font-bold text-teal-600"></span></p>
+            </div>
+
+            <!-- 체중 -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">체중 (kg) *</label>
+                <input type="number" id="weight" required min="30" max="200" step="0.1"
+                       placeholder="예: 70.5"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 transition">
+            </div>
+
+            <!-- 수축기 혈압 -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">수축기 혈압 (mmHg) *</label>
+                <input type="number" id="systolicBp" required min="70" max="250"
+                       placeholder="예: 120"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 transition">
+            </div>
+
+            <!-- 이완기 혈압 -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">이완기 혈압 (mmHg) *</label>
+                <input type="number" id="diastolicBp" required min="40" max="150"
+                       placeholder="예: 80"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 transition">
+            </div>
+
+            <!-- 혈당 -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">혈당 (mg/dL) *</label>
+                <input type="number" id="glucose" required min="50" max="500"
+                       placeholder="예: 100"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 transition">
+            </div>
+
+            <!-- 흡연량 -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">오늘 흡연량 (개비) *</label>
+                <input type="number" id="smoking" required min="0" max="100"
+                       placeholder="흡연하지 않았다면 0"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 transition">
+            </div>
+
+            <!-- 제출 버튼 -->
+            <div class="pt-6 flex gap-4">
+                <button type="button" onclick="history.back()" 
+                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-xl font-bold transition">
+                    취소
+                </button>
+                <button type="submit" 
+                        class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-4 rounded-xl font-bold shadow-lg shadow-teal-200 transition flex items-center justify-center gap-2">
+                    <i data-lucide="check" class="w-5 h-5"></i>
+                    <span>저장하기</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/patient/variable_info_input.js"></script>
+{% endblock %}

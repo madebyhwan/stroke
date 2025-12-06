@@ -1,0 +1,55 @@
+<aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 shrink-0 shadow-sm z-10">
+    <div class="p-6 border-b border-gray-100 flex items-center gap-2 font-bold text-xl text-teal-600 shrink-0">
+        <i data-lucide="heart-pulse"></i>
+        <span>예방 시스템</span>
+    </div>
+
+    <nav class="p-4 space-y-2 flex-1 overflow-y-auto">
+        <a href="/patient/home" class="flex items-center gap-3 p-3 rounded-xl {% if active_menu == 'home' %}bg-teal-50 text-teal-600 font-bold shadow-sm{% else %}text-gray-600 hover:bg-teal-50 hover:text-teal-600{% endif %} transition">
+            <i data-lucide="home" class="w-5 h-5"></i>
+            <span>대시보드</span>
+        </a>
+        <a href="/patient/basic-info" class="flex items-center gap-3 p-3 rounded-xl {% if active_menu == 'health-input' %}bg-teal-50 text-teal-600 font-bold shadow-sm{% else %}text-gray-600 hover:bg-teal-50 hover:text-teal-600{% endif %} transition">
+            <i data-lucide="file-edit" class="w-5 h-5"></i>
+            <span>건강 정보 입력</span>
+        </a>
+        <a href="/patient/health-data-inquiry" class="flex items-center gap-3 p-3 rounded-xl {% if active_menu == 'health-inquiry' %}bg-teal-50 text-teal-600 font-bold shadow-sm{% else %}text-gray-600 hover:bg-teal-50 hover:text-teal-600{% endif %} transition">
+            <i data-lucide="activity" class="w-5 h-5"></i>
+            <span>건강 정보 조회</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 p-3 rounded-xl text-gray-600 hover:bg-teal-50 hover:text-teal-600 transition">
+            <i data-lucide="monitor-smartphone" class="w-5 h-5"></i>
+            <span>모니터링 사용자 관리</span>
+        </a>
+    </nav>
+
+    <div class="p-4 border-t border-gray-100 shrink-0 bg-white">
+        <div class="flex items-center gap-3 p-3 mb-2">
+            <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold">
+                <span id="profileInitial">OO</span>
+            </div>
+            <div>
+                <p class="text-sm font-bold" id="profileName">김OO 님</p>
+                <p class="text-xs text-gray-500">환자 회원</p>
+            </div>
+        </div>
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 p-3 text-red-600 hover:bg-red-50 rounded-xl transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span class="text-sm font-medium">로그아웃</span>
+        </button>
+    </div>
+</aside>
+
+<script>
+function handleLogout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        // localStorage 초기화
+        localStorage.removeItem('currentUserId');
+        localStorage.removeItem('currentUserName');
+        localStorage.removeItem('currentUserRole');
+        
+        // 로그인 페이지로 이동
+        window.location.href = '/login';
+    }
+}
+</script>

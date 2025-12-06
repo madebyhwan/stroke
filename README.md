@@ -102,7 +102,6 @@ pip install fastapi==0.109.0
 pip install "uvicorn[standard]"
 pip install motor
 pip install pydantic
-pip install passlib[bcrypt]
 ```
 
 #### 4. MongoDB 실행

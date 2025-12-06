@@ -195,7 +195,30 @@
 - **Error**:
   - `404`: 건강 측정 데이터를 찾을 수 없음
 
-### 4. 건강 측정 데이터 삭제
+### 4. 모니터링 권한으로 환자 데이터 조회
+- **Endpoint**: `GET /health/records/monitor/{monitor_id}/patient/{patient_id}`
+- **설명**: 모니터링 권한이 있는 사용자가 환자의 건강 측정 데이터 조회
+- **Path Parameter**:
+  - `monitor_id`: 모니터(의사/보호자) 아이디
+  - `patient_id`: 환자 아이디
+- **Response**: `List[HealthRecordResponse]` (200 OK)
+- **Error**:
+  - `403`: 모니터링 권한 없음
+  - `500`: 데이터 조회 실패
+
+### 5. 모니터링 권한으로 환자 최신 데이터 조회
+- **Endpoint**: `GET /health/records/monitor/{monitor_id}/patient/{patient_id}/latest`
+- **설명**: 모니터링 권한이 있는 사용자가 환자의 최신 건강 측정 데이터 조회
+- **Path Parameter**:
+  - `monitor_id`: 모니터(의사/보호자) 아이디
+  - `patient_id`: 환자 아이디
+- **Response**: `HealthRecordResponse` (200 OK)
+- **Error**:
+  - `403`: 모니터링 권한 없음
+  - `404`: 건강 측정 데이터를 찾을 수 없음
+  - `500`: 데이터 조회 실패
+
+### 6. 건강 측정 데이터 삭제
 - **Endpoint**: `DELETE /health/records/{record_id}`
 - **설명**: 건강 측정 데이터 삭제
 - **Path Parameter**:
@@ -210,49 +233,7 @@
 
 **Base URL**: `/memos`
 
-### 1. 메모 작성
-- **Endpoint**: `POST /memos/`
-- **설명**: 새로운 메모 작성
-- **Request Body**:
-  ```json
-  {
-    "user_id": "user123",
-    "title": "오늘의 건강 기록",
-    "content": "아침 운동 30분 완료"
-  }
-  ```
-- **Response**: `MemoResponse` (201 Created)
-
-### 2. 사용자별 메모 목록 조회
-- **Endpoint**: `GET /memos/user/{user_id}`
-- **설명**: 특정 사용자의 메모 목록 조회
-- **Path Parameter**:
-  - `user_id`: 사용자 아이디
-- **Response**: `List[MemoResponse]` (200 OK)
-
-### 3. 메모 상세 조회
-- **Endpoint**: `GET /memos/{memo_id}`
-- **설명**: 특정 메모 상세 정보 조회
-- **Response**: `MemoResponse` (200 OK)
-- **Error**:
-  - `404`: 메모를 찾을 수 없음
-
-### 4. 메모 수정
-- **Endpoint**: `PUT /memos/{memo_id}`
-- **설명**: 기존 메모 수정
-- **Request Body**:
-  ```json
-  {
-    "title": "수정된 제목",
-    "content": "수정된 내용"
-  }
-  ```
-- **Response**: `MemoResponse` (200 OK)
-
-### 5. 메모 삭제
-- **Endpoint**: `DELETE /memos/{memo_id}`
-- **설명**: 메모 삭제
-- **Response**: `204 No Content`
+### 0. 개발 중,,,
 
 ---
 
@@ -390,6 +371,7 @@
 - **Error**:
   - `404`: 모니터링 관계를 찾을 수 없음
   - `500`: 관계 해제 실패
+- **참고**: 관계가 해제되면 연결된 요청 기록도 함께 삭제됨
 
 ---
 
