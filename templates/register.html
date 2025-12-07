@@ -1,55 +1,186 @@
-{% extends "auth_base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}회원가입 - 뇌졸중 예방 시스템{% endblock %}
-{% block header_link %}/register{% endblock %}
+{% block title %}회원가입 - 뇌졸중 관리 시스템{% endblock %}
 
 {% block content %}
-<div class="text-center mb-10">
-    <div class="bg-teal-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-        <i data-lucide="user-plus" class="w-10 h-10 text-teal-600"></i>
-    </div>
-    <h1 class="text-2xl font-bold text-gray-800">회원가입</h1>
-    <p class="text-gray-500 mt-2">건강한 하루를 시작하세요</p>
-</div>
+<div class="min-h-screen py-8 -mt-4">
+    <div class="w-full max-w-md mx-auto fade-in">
+        <!-- 헤더 -->
+        <div class="mb-6">
+            <button onclick="window.location.href='/login'" class="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span>뒤로가기</span>
+            </button>
+        </div>
 
-<form id="registerForm" class="space-y-4 bg-white p-6 rounded-2xl shadow-sm">
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">이름</label>
-        <input type="text" id="userName" required
-            class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-            placeholder="이름을 입력하세요">
+        <!-- 회원가입 폼 -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full mb-3">
+                    <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">회원가입</h2>
+                <p class="text-gray-500 text-sm mt-1">건강 관리의 시작</p>
+            </div>
+            
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4">
+                <div>
+                    <label for="userId" class="block text-sm font-medium text-gray-700 mb-2">
+                        아이디 <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="userId" 
+                        name="id" 
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="아이디를 입력하세요"
+                    >
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        비밀번호 <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="비밀번호를 입력하세요"
+                    >
+                </div>
+
+                <div>
+                    <label for="passwordConfirm" class="block text-sm font-medium text-gray-700 mb-2">
+                        비밀번호 확인 <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="passwordConfirm" 
+                        name="passwordConfirm" 
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="비밀번호를 다시 입력하세요"
+                    >
+                </div>
+
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                        이름 <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        placeholder="이름을 입력하세요"
+                    >
+                </div>
+
+                <div>
+                    <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                        역할 <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="role" 
+                        name="role" 
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                    >
+                        <option value="">선택하세요</option>
+                        <option value="PATIENT">환자</option>
+                        <option value="DOCTOR">의사</option>
+                        <option value="CAREGIVER">보호자</option>
+                    </select>
+                </div>
+
+                <div class="pt-4">
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 rounded-lg font-semibold hover:from-teal-700 hover:to-cyan-700 transition duration-300 flex items-center justify-center gap-2"
+                    >
+                        <span>회원가입</span>
+                        <i data-lucide="check" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- 로그인 링크 -->
+            <div class="mt-6 text-center">
+                <p class="text-gray-600 text-sm">
+                    이미 계정이 있으신가요? 
+                    <a href="/login" class="text-teal-600 font-semibold hover:text-teal-700 transition">
+                        로그인
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- 안내 사항 -->
+        <div class="mt-6 bg-blue-50 rounded-2xl p-6 border border-blue-100">
+            <div class="flex items-start gap-3">
+                <i data-lucide="shield-check" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                <div class="text-sm text-gray-700">
+                    <p class="font-semibold mb-2">개인정보 보호</p>
+                    <ul class="space-y-1 text-gray-600">
+                        <li>• 안전한 비밀번호를 사용하세요</li>
+                        <li>• 개인 건강 정보는 암호화되어 저장됩니다</li>
+                        <li>• 의료진만 승인 시 데이터를 확인할 수 있습니다</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">아이디</label>
-        <input type="text" id="userId" required
-            class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-            placeholder="아이디를 입력하세요">
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
-        <input type="password" id="userPassword" required
-            class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-            placeholder="비밀번호를 입력하세요">
-    </div>
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">역할</label>
-        <select id="userRole" required
-            class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
-            <option value="PATIENT">환자</option>
-            <option value="DOCTOR">의사</option>
-            <option value="CAREGIVER">보호자</option>
-        </select>
-    </div>
-    <button type="submit"
-        class="w-full bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-lg shadow-teal-200 mt-2">
-        가입하기
-    </button>
-    <div class="text-center text-sm text-gray-400 mt-4">
-        이미 계정이 있으신가요? <a href="/login" class="text-teal-600 font-bold hover:underline">로그인</a>
-    </div>
-</form>
+</div>
 {% endblock %}
 
-{% block extra_scripts %}
-<script src="/static/js/register.js"></script>
+{% block extra_js %}
+<script>
+async function handleRegister(event) {
+    event.preventDefault();
+    
+    const userId = document.getElementById('userId').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const passwordConfirm = document.getElementById('passwordConfirm').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const role = document.getElementById('role').value;
+    
+    // 유효성 검사
+    if (!userId || !password || !name || !role) {
+        showAlert('모든 필수 항목을 입력해주세요.', 'error');
+        return;
+    }
+    
+    if (password !== passwordConfirm) {
+        showAlert('비밀번호가 일치하지 않습니다.', 'error');
+        return;
+    }
+    
+    if (password.length < 4) {
+        showAlert('비밀번호는 최소 4자 이상이어야 합니다.', 'error');
+        return;
+    }
+    
+    try {
+        const response = await apiCall('/users/register', 'POST', {
+            id: userId,
+            password: password,
+            name: name,
+            role: role
+        });
+        
+        showAlert('회원가입 성공! 로그인 페이지로 이동합니다.', 'success');
+        
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1500);
+        
+    } catch (error) {
+        showAlert(error.message || '회원가입에 실패했습니다. 다시 시도해주세요.', 'error');
+    }
+}
+</script>
 {% endblock %}

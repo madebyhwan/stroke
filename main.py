@@ -66,20 +66,20 @@ async def register_page(request: Request):
 
 @app.get("/patient/home", response_class=HTMLResponse)
 async def patient_home(request: Request):
-    return templates.TemplateResponse("patient/patient_home.html", {"request": request})
+    return templates.TemplateResponse("patient/home.html", {"request": request})
 
 @app.get("/patient/basic-info", response_class=HTMLResponse)
 async def basic_info_input(request: Request):
-    return templates.TemplateResponse("patient/basic_info_input.html", {"request": request})
-
-@app.get("/patient/variable-info", response_class=HTMLResponse)
-async def variable_info_input(request: Request):
-    return templates.TemplateResponse("patient/variable_info_input.html", {"request": request})
+    return templates.TemplateResponse("patient/basic_info.html", {"request": request})
 
 @app.get("/patient/health-data-input", response_class=HTMLResponse)
 async def health_data_input(request: Request):
-    return templates.TemplateResponse("patient/patient_health_data_input.html", {"request": request})
+    return templates.TemplateResponse("patient/health_data_input.html", {"request": request})
 
 @app.get("/patient/health-data-inquiry", response_class=HTMLResponse)
 async def health_data_inquiry(request: Request):
-    return templates.TemplateResponse("patient/patient_health_data_inquiry.html", {"request": request})
+    return templates.TemplateResponse("patient/health_data_inquiry.html", {"request": request})
+
+@app.get("/patient/profile", response_class=HTMLResponse)
+async def profile_edit(request: Request):
+    return templates.TemplateResponse("patient/profile_edit.html", {"request": request})

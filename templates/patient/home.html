@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}홈 - 뇌졸중 관리{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-2 text-sm">
+    <a href="/patient/profile" class="font-medium hover:text-teal-600 transition cursor-pointer underline" id="userName">환자</a>님
+    <button onclick="handleLogout()" class="text-gray-400 hover:text-gray-600">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-10">
+    <!-- 환영 메시지 -->
+    <div class="bg-gradient-to-r from-teal-500 to-cyan-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+        <div class="relative z-10">
+            <h2 class="text-2xl font-bold mb-1">안녕하세요! 👋</h2>
+            <p class="text-purple-50 text-sm mb-4" id="welcomeMessage">
+                오늘도 건강한 하루 보내세요
+            </p>
+        </div>
+        <i data-lucide="heart-pulse" class="absolute -right-4 -bottom-4 w-32 h-32 text-white/10"></i>
+    </div>
+
+    <!-- 주요 기능 그리드 -->
+    <div class="grid grid-cols-2 gap-4">
+        <!-- 건강 데이터 입력 -->
+        <a href="/patient/health-data-input" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition card-hover group">
+            <div class="bg-orange-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                <i data-lucide="clipboard-list" class="w-6 h-6 text-orange-600"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">건강 기록</h3>
+            <p class="text-xs text-gray-500 mt-1">측정 데이터 입력</p>
+        </a>
+
+        <!-- 건강 데이터 조회 -->
+        <a href="/patient/health-data-inquiry" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition card-hover group">
+            <div class="bg-purple-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                <i data-lucide="bar-chart-3" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h3 class="font-bold text-gray-800">건강 조회</h3>
+            <p class="text-xs text-gray-500 mt-1">데이터 확인</p>
+        </a>
+    </div>
+
+    <!-- 뇌졸중 위험도 카드 -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800">나의 뇌졸중 위험도</h3>
+            <i data-lucide="alert-circle" class="w-5 h-5 text-gray-400"></i>
+        </div>
+        
+        <div id="riskScoreContainer" class="text-center py-6">
+            <div class="text-4xl font-bold text-teal-600 mb-2" id="riskScore">-</div>
+            <p class="text-sm text-gray-500" id="riskStatus">데이터를 입력하고 위험도를 확인하세요</p>
+        </div>
+
+        <button onclick="window.location.href='/patient/health-data-inquiry'" class="w-full mt-4 bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition">
+            자세히 보기
+        </button>
+    </div>
+
+    <!-- 최근 건강 기록 -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800">최근 건강 기록</h3>
+            <a href="/patient/health-data-inquiry" class="text-purple-600 text-sm font-medium hover:text-purple-700">
+                전체보기
+            </a>
+        </div>
+        
+        <div id="recentRecords" class="space-y-3">
+            <p class="text-sm text-gray-500 text-center py-4">아직 기록이 없습니다</p>
+        </div>
+    </div>
+
+    <!-- 정보 카드 -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+        <div class="flex items-start gap-3">
+            <i data-lucide="lightbulb" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+            <div class="text-sm text-gray-700">
+                <p class="font-semibold mb-1">건강 관리 팁</p>
+                <p class="text-gray-600">꾸준한 혈압 관리와 규칙적인 운동으로 뇌졸중 위험을 낮출 수 있습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block bottom_nav %}
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+    <div class="max-w-md mx-auto px-4 py-3">
+        <div class="flex items-center justify-around">
+            <a href="/patient/home" class="flex flex-col items-center gap-1 text-teal-600">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">홈</span>
+            </a>
+            <a href="/patient/health-data-input" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
+                <i data-lucide="plus-circle" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">기록</span>
+            </a>
+            <a href="/patient/health-data-inquiry" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
+                <i data-lucide="line-chart" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">분석</span>
+            </a>
+            <a href="/patient/basic-info" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">정보</span>
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 페이지 로드 시 사용자 정보 및 최근 기록 로드
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = storage.get('user');
+    
+    if (!user || !user.id) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    // 사용자 이름 표시
+    document.getElementById('userName').textContent = user.name || '환자';
+    document.getElementById('welcomeMessage').textContent = 
+        `${user.name || '환자'}님, 오늘도 건강한 하루 보내세요`;
+    
+    // 최근 건강 기록 로드
+    try {
+        const records = await apiCall(`/health/records/user/${user.id}`, 'GET');
+        displayRecentRecords(records.slice(0, 3)); // 최근 3개만 표시
+        
+        // 최신 기록 기반 위험도 표시
+        if (records.length > 0) {
+            const latestRecord = records[0];
+            if (latestRecord.stroke_risk_score !== undefined) {
+                displayRiskScore(latestRecord.stroke_risk_score);
+            }
+        }
+    } catch (error) {
+        console.error('데이터 로드 오류:', error);
+    }
+});
+
+function displayRecentRecords(records) {
+    const container = document.getElementById('recentRecords');
+    
+    if (!records || records.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">아직 기록이 없습니다</p>';
+        return;
+    }
+    
+    container.innerHTML = records.map(record => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="activity" class="w-5 h-5 text-purple-600"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-800">혈압: ${record.systolic_bp}/${record.diastolic_bp}</p>
+                    <p class="text-xs text-gray-500">${formatDate(record.measured_at)}</p>
+                </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+        </div>
+    `).join('');
+    
+    lucide.createIcons();
+}
+
+function displayRiskScore(score) {
+    const scoreElement = document.getElementById('riskScore');
+    const statusElement = document.getElementById('riskStatus');
+    
+    scoreElement.textContent = score.toFixed(1) + '%';
+    
+    if (score < 5) {
+        statusElement.textContent = '낮은 위험도 - 건강한 상태를 유지하세요!';
+        scoreElement.className = 'text-4xl font-bold text-green-600 mb-2';
+    } else if (score < 10) {
+        statusElement.textContent = '보통 위험도 - 건강 관리에 주의하세요';
+        scoreElement.className = 'text-4xl font-bold text-yellow-600 mb-2';
+    } else {
+        statusElement.textContent = '높은 위험도 - 의료진 상담이 필요합니다';
+        scoreElement.className = 'text-4xl font-bold text-red-600 mb-2';
+    }
+}
+
+function handleLogout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        storage.clear();
+        showAlert('로그아웃 되었습니다.', 'success');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1000);
+    }
+}
+</script>
+{% endblock %}

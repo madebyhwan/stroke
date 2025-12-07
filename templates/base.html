@@ -3,34 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}뇌졸중 예방 시스템{% endblock %}</title>
+    <title>{% block title %}뇌졸중 관리 시스템{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
     <script src="https://unpkg.com/lucide@latest"></script>
-    {% block extra_head %}{% endblock %}
+    {% block extra_css %}{% endblock %}
 </head>
+<body class="text-gray-800 pb-20">
+    <!-- 헤더 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="/patient/home" class="flex items-center gap-2 font-bold text-xl text-teal-600">
+                <i data-lucide="heart-pulse"></i> 
+                <span>뇌졸중 관리</span>
+            </a>
+            {% block header_actions %}
+            <!-- 로그인된 경우 사용자 정보 표시 -->
+            {% endblock %}
+        </div>
+    </header>
 
-<body class="bg-gray-50 text-gray-800 font-sans">
+    <!-- 메인 컨텐츠 -->
+    <main class="max-w-md mx-auto p-4 min-h-screen">
+        <!-- 플래시 메시지 (알림) -->
+        <div id="alert-container"></div>
+        
+        {% block content %}{% endblock %}
+    </main>
 
-    <div class="flex min-h-screen">
+    <!-- 하단 네비게이션 (환자 페이지용) -->
+    {% block bottom_nav %}{% endblock %}
 
-        <!-- 사이드바 -->
-        {% include 'components/sidebar.html' %}
-
-        <!-- 메인 컨텐츠 -->
-        <main class="flex-1 p-8">
-            
-            <!-- 상단 네비게이션 바 -->
-            {% include 'components/navbar.html' %}
-
-            <!-- 페이지별 컨텐츠 -->
-            {% block content %}{% endblock %}
-
-        </main>
-    </div>
-
-    <script>
-        lucide.createIcons();
-    </script>
-    {% block extra_scripts %}{% endblock %}
+    <script src="{{ url_for('static', path='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

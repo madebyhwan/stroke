@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}건강 데이터 입력 - 뇌졸중 관리{% endblock %}
+
+{% block header_actions %}
+<button onclick="goBack()" class="text-gray-600 hover:text-gray-800">
+    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-10">
+    <!-- 페이지 제목 -->
+    <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-3">
+            <i data-lucide="clipboard-list" class="w-8 h-8 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">건강 데이터 입력</h2>
+        <p class="text-gray-500 text-sm mt-1">오늘의 건강 측정 데이터를 기록하세요</p>
+    </div>
+
+    <!-- 건강 데이터 입력 폼 -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <form id="healthDataForm" onsubmit="handleHealthDataSubmit(event)" class="space-y-5">
+            
+            <!-- 체중 -->
+            <div>
+                <label for="weight_kg" class="block text-sm font-medium text-gray-700 mb-2">
+                    체중 (kg) <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input 
+                        type="number" 
+                        id="weight_kg" 
+                        name="weight_kg" 
+                        required
+                        min="30"
+                        max="200"
+                        step="0.1"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        placeholder="예: 70"
+                    >
+                    <span class="absolute right-4 top-3.5 text-gray-400 text-sm">kg</span>
+                </div>
+            </div>
+
+            <!-- 수축기 혈압 -->
+            <div>
+                <label for="systolic_bp" class="block text-sm font-medium text-gray-700 mb-2">
+                    수축기 혈압 <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input 
+                        type="number" 
+                        id="systolic_bp" 
+                        name="systolic_bp" 
+                        required
+                        min="70"
+                        max="250"
+                        step="1"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        placeholder="예: 120"
+                    >
+                    <span class="absolute right-4 top-3.5 text-gray-400 text-sm">mmHg</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">정상: 90-120 mmHg</p>
+            </div>
+
+            <!-- 이완기 혈압 -->
+            <div>
+                <label for="diastolic_bp" class="block text-sm font-medium text-gray-700 mb-2">
+                    이완기 혈압 <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input 
+                        type="number" 
+                        id="diastolic_bp" 
+                        name="diastolic_bp" 
+                        required
+                        min="40"
+                        max="150"
+                        step="1"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        placeholder="예: 80"
+                    >
+                    <span class="absolute right-4 top-3.5 text-gray-400 text-sm">mmHg</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">정상: 60-80 mmHg</p>
+            </div>
+
+            <!-- 혈당 -->
+            <div>
+                <label for="glucose_level" class="block text-sm font-medium text-gray-700 mb-2">
+                    혈당 <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input 
+                        type="number" 
+                        id="glucose_level" 
+                        name="glucose_level" 
+                        required
+                        min="50"
+                        max="500"
+                        step="1"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        placeholder="예: 100"
+                    >
+                    <span class="absolute right-4 top-3.5 text-gray-400 text-sm">mg/dL</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">정상 공복 혈당: 70-100 mg/dL</p>
+            </div>
+
+            <!-- 흡연량 -->
+            <div>
+                <label for="smoking" class="block text-sm font-medium text-gray-700 mb-2">
+                    오늘 흡연량 (개비) <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input 
+                        type="number" 
+                        id="smoking" 
+                        name="smoking" 
+                        required
+                        min="0"
+                        max="100"
+                        step="1"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        placeholder="흡연하지 않으면 0"
+                    >
+                    <span class="absolute right-4 top-3.5 text-gray-400 text-sm">개비</span>
+                </div>
+            </div>
+
+            <!-- 제출 버튼 -->
+            <div class="pt-4 space-y-3">
+                <button 
+                    type="submit" 
+                    class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 rounded-lg font-semibold hover:from-teal-700 hover:to-cyan-700 transition duration-300 flex items-center justify-center gap-2"
+                >
+                    <span>기록 저장</span>
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 빠른 입력 가이드 -->
+    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+        <div class="flex items-start gap-3">
+            <i data-lucide="zap" class="w-5 h-5 text-green-600 mt-0.5"></i>
+            <div class="text-sm text-gray-700">
+                <p class="font-semibold mb-2">측정 팁</p>
+                <ul class="space-y-1 text-gray-600">
+                    <li>• 혈압은 아침 공복 상태에서 측정하세요</li>
+                    <li>• 혈당은 식전/식후를 구분하여 기록하세요</li>
+                    <li>• 매일 같은 시간에 측정하면 더 정확합니다</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 최근 기록 카드 -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800">최근 기록</h3>
+            <a href="/patient/health-data-inquiry" class="text-teal-600 text-sm font-medium hover:text-teal-700">
+                전체보기
+            </a>
+        </div>
+        
+        <div id="recentRecords" class="space-y-3">
+            <p class="text-sm text-gray-500 text-center py-4">아직 기록이 없습니다</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block bottom_nav %}
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+    <div class="max-w-md mx-auto px-4 py-3">
+        <div class="flex items-center justify-around">
+            <a href="/patient/home" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">홈</span>
+            </a>
+            <a href="/patient/health-data-input" class="flex flex-col items-center gap-1 text-teal-600">
+                <i data-lucide="plus-circle" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">기록</span>
+            </a>
+            <a href="/patient/health-data-inquiry" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
+                <i data-lucide="line-chart" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">분석</span>
+            </a>
+            <a href="/patient/basic-info" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">정보</span>
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 페이지 로드 시 최근 기록 불러오기
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = storage.get('user');
+    
+    if (!user || !user.id) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        const records = await apiCall(`/health/records/user/${user.id}`, 'GET');
+        displayRecentRecords(records.slice(0, 3));
+    } catch (error) {
+        console.log('최근 기록 없음');
+    }
+});
+
+function displayRecentRecords(records) {
+    const container = document.getElementById('recentRecords');
+    
+    if (!records || records.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">아직 기록이 없습니다</p>';
+        return;
+    }
+    
+    container.innerHTML = records.map(record => `
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-800">${formatDate(record.created_at)}</span>
+                <span class="text-xs text-teal-600 font-semibold">기록됨</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                <div>혈압: ${record.systolic_bp}/${record.diastolic_bp}</div>
+                <div>혈당: ${record.glucose_level} mg/dL</div>
+                <div>체중: ${record.weight_kg} kg</div>
+                <div>흡연: ${record.smoking}개비</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function handleHealthDataSubmit(event) {
+    event.preventDefault();
+    
+    const user = storage.get('user');
+    if (!user || !user.id) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    const formData = {
+        user_id: user.id,
+        weight_kg: parseInt(document.getElementById('weight_kg').value),
+        systolic_bp: parseInt(document.getElementById('systolic_bp').value),
+        diastolic_bp: parseInt(document.getElementById('diastolic_bp').value),
+        glucose_level: parseInt(document.getElementById('glucose_level').value),
+        smoking: parseInt(document.getElementById('smoking').value)
+    };
+    
+    // 유효성 검사
+    if (formData.systolic_bp <= formData.diastolic_bp) {
+        showAlert('수축기 혈압은 이완기 혈압보다 높아야 합니다.', 'error');
+        return;
+    }
+    
+    try {
+        await apiCall('/health/records', 'POST', formData);
+        showAlert('건강 데이터가 저장되었습니다!', 'success');
+        
+        // 폼 초기화
+        document.getElementById('healthDataForm').reset();
+        
+        // 최근 기록 새로고침
+        const records = await apiCall(`/health/records/user/${user.id}`, 'GET');
+        displayRecentRecords(records.slice(0, 3));
+        
+        // 1.5초 후 홈으로 이동
+        setTimeout(() => {
+            window.location.href = '/patient/home';
+        }, 1500);
+        
+    } catch (error) {
+        showAlert(error.message || '저장에 실패했습니다. 다시 시도해주세요.', 'error');
+    }
+}
+</script>
+{% endblock %}
