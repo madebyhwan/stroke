@@ -27,9 +27,17 @@ async def create_monitoring_request(
     if not patient:
         raise ValueError("환자를 찾을 수 없습니다.")
     
+    # 환자 역할 확인
+    if patient.role != "PATIENT":
+        raise ValueError("환자 역할의 사용자에게만 요청할 수 있습니다.")
+    
     requester = await userCrud.get_user_by_id(db, request_data.requester_id)
     if not requester:
         raise ValueError("요청자를 찾을 수 없습니다.")
+    
+    # 요청자 역할 확인
+    if requester.role not in ["DOCTOR", "CAREGIVER"]:
+        raise ValueError("의사 또는 보호자만 모니터링을 요청할 수 있습니다.")
     
     # 이미 대기중인 요청이 있는지 확인
     existing_requests = await monitoringCrud.request_exists(
@@ -93,6 +101,31 @@ async def get_pending_requests_for_patient(
                 requester_id=req.requester_id,
                 requester_name=requester.name,
                 requester_role=requester.role,
+                status=req.status,
+                created_at=req.created_at,
+                responded_at=req.responded_at
+            ))
+    
+    return result
+
+async def get_requests_by_requester(
+    db: AsyncIOMotorDatabase, 
+    requester_id: str
+) -> List[MonitoringRequestResponse]:
+    """의사/보호자가 보낸 모니터링 요청 목록"""
+    requests = await monitoringCrud.get_requests_by_requester(db, requester_id)
+    
+    result = []
+    for req in requests:
+        patient = await userCrud.get_user_by_id(db, req.patient_id)
+        if patient:
+            result.append(MonitoringRequestResponse(
+                id=req.id,
+                patient_id=req.patient_id,
+                patient_name=patient.name,
+                requester_id=req.requester_id,
+                requester_name="",  # 본인이므로 불필요
+                requester_role="",
                 status=req.status,
                 created_at=req.created_at,
                 responded_at=req.responded_at
@@ -207,10 +240,28 @@ async def delete_monitoring_relation(
         raise ValueError("모니터링 관계를 찾을 수 없습니다.")
     
     # 관계 삭제
-    relation_deleted = await monitoringCrud.delete_monitoring_relation(db, relation_id)
+    deleted = await monitoringCrud.delete_monitoring_relation(db, relation_id)
     
     # 해당 관계와 연결된 요청도 삭제
-    if relation_deleted and relation.request_id:
+    if relation.request_id:
         await monitoringCrud.delete_request_by_id(db, relation.request_id)
     
-    return relation_deleted
+    return deleted
+
+async def delete_monitoring_request(
+    db: AsyncIOMotorDatabase, 
+    request_id: str
+) -> bool:
+    """모니터링 요청 삭제 (취소)"""
+    # 요청 존재 확인
+    request = await monitoringCrud.get_request_by_id(db, request_id)
+    if not request:
+        raise ValueError("요청을 찾을 수 없습니다.")
+    
+    # PENDING 상태만 삭제 가능
+    if request.status != MonitoringStatus.PENDING:
+        raise ValueError("대기 중인 요청만 취소할 수 있습니다.")
+    
+    # 요청 삭제
+    deleted = await monitoringCrud.delete_request_by_id(db, request_id)
+    return deleted

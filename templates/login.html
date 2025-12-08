@@ -90,16 +90,17 @@ async function handleLogin(event) {
         
         // 로그인 성공 - 사용자 정보 저장
         storage.set('user', response);
-        showAlert('로그인 성공! 환영합니다.', 'success');
         
         // 역할에 따라 리다이렉트
         setTimeout(() => {
             if (response.role === 'PATIENT') {
                 window.location.href = '/patient/home';
+            } else if (response.role === 'DOCTOR' || response.role === 'CAREGIVER') {
+                window.location.href = '/monitor/home';
             } else {
-                window.location.href = '/patient/home'; // 추후 의사/보호자 페이지 추가
+                window.location.href = '/patient/home';
             }
-        }, 1000);
+        }, 100);
         
     } catch (error) {
         showAlert(error.message || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.', 'error');

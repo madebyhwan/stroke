@@ -3,9 +3,17 @@
 {% block title %}건강 데이터 조회 - 뇌졸중 관리{% endblock %}
 
 {% block header_actions %}
-<button onclick="goBack()" class="text-gray-600 hover:text-gray-800">
-    <i data-lucide="arrow-left" class="w-5 h-5"></i>
-</button>
+<div class="flex items-center gap-3 text-sm">
+    <!-- 알림 아이콘 -->
+    <button onclick="showNotifications()" class="relative p-2 hover:bg-gray-100 rounded-lg transition">
+        <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+        <span id="notificationBadge" class="hidden absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+    </button>
+    <a href="/patient/profile" class="font-medium hover:text-teal-600 transition cursor-pointer underline" id="userName">환자</a>님
+    <button onclick="handleLogout()" class="text-gray-400 hover:text-gray-600">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+    </button>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -133,47 +141,25 @@
 </div>
 {% endblock %}
 
-{% block bottom_nav %}
-<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
-    <div class="max-w-md mx-auto px-4 py-3">
-        <div class="flex items-center justify-around">
-            <a href="/patient/home" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
-                <i data-lucide="home" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">홈</span>
-            </a>
-            <a href="/patient/health-data-input" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
-                <i data-lucide="plus-circle" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">기록</span>
-            </a>
-            <a href="/patient/health-data-inquiry" class="flex flex-col items-center gap-1 text-teal-600">
-                <i data-lucide="line-chart" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">분석</span>
-            </a>
-            <a href="/patient/basic-info" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
-                <i data-lucide="user" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">정보</span>
-            </a>
-        </div>
-    </div>
-</nav>
-{% endblock %}
+{% set active_tab = 'inquiry' %}
+{% include 'patient/_bottom_nav.html' %}
 
 {% block extra_js %}
+{% include 'patient/_common_scripts.html' %}
 <script>
 let allRecords = [];
 
 // 페이지 로드 시 데이터 불러오기
 document.addEventListener('DOMContentLoaded', async () => {
+    const user = initPatientPage();
+    if (!user) return;
+    
     await refreshData();
 });
 
 async function refreshData() {
     const user = storage.get('user');
-    
-    if (!user || !user.id) {
-        window.location.href = '/login';
-        return;
-    }
+    if (!user || !user.id) return;
     
     try {
         const records = await apiCall(`/health/records/user/${user.id}`, 'GET');

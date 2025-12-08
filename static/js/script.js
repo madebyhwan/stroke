@@ -35,11 +35,31 @@ async function apiCall(url, method = 'GET', data = null) {
 
     try {
         const response = await fetch(url, options);
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || '요청 실패');
+        
+        // 204 No Content는 정상 응답으로 처리
+        if (response.status === 204) {
+            return null;
         }
-        return await response.json();
+        
+        if (!response.ok) {
+            // 에러 응답 처리
+            let errorMessage = '요청 실패';
+            try {
+                const error = await response.json();
+                errorMessage = error.detail || errorMessage;
+            } catch (e) {
+                // JSON 파싱 실패 시 상태 텍스트 사용
+                errorMessage = response.statusText || errorMessage;
+            }
+            throw new Error(errorMessage);
+        }
+        
+        // 정상 응답 JSON 파싱 (body가 없으면 null 반환)
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        }
+        return null;
     } catch (error) {
         console.error('API 호출 오류:', error);
         throw error;

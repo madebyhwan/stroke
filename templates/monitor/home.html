@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+
+{% block title %}모니터링 - 뇌졸중 관리{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-3 text-sm">
+    <a href="/monitor/profile" class="font-medium hover:text-teal-600 transition cursor-pointer underline" id="userName">사용자</a>님
+    <button onclick="handleLogout()" class="text-gray-400 hover:text-gray-600">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-20">
+    <!-- 환영 메시지 -->
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+        <div class="relative z-10">
+            <h2 class="text-2xl font-bold mb-1">환자 모니터링 👨‍⚕️</h2>
+            <p class="text-blue-50 text-sm mb-4" id="welcomeMessage">
+                등록한 환자들의 건강 상태를 확인하세요
+            </p>
+        </div>
+        <i data-lucide="activity" class="absolute -right-4 -bottom-4 w-32 h-32 text-white/10"></i>
+    </div>
+
+    <!-- 모니터링 요청 섹션 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-5 h-5 text-teal-600"></i>
+            환자 추가하기
+        </h3>
+        
+        <!-- 환자 검색 -->
+        <div class="mb-4">
+            <div class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="patientSearchInput" 
+                    placeholder="환자 아이디 입력"
+                    class="w-16 flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    onkeypress="if(event.key === 'Enter') { event.preventDefault(); searchPatient(); }"
+                />
+                <button 
+                    onclick="searchPatient()"
+                    class="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition flex items-center gap-2"
+                >
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    검색
+                </button>
+            </div>
+        </div>
+
+        <!-- 검색 결과 -->
+        <div id="searchResult" class="hidden mb-4 p-4 border border-blue-200 bg-blue-50 rounded-xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-800" id="foundPatientName">-</h4>
+                        <p class="text-xs text-gray-500" id="foundPatientId">-</p>
+                        <p class="text-xs text-blue-600" id="foundPatientRole">-</p>
+                    </div>
+                </div>
+                <button 
+                    onclick="sendMonitoringRequest()"
+                    class="px-4 py-2 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition flex items-center gap-2"
+                >
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    요청
+                </button>
+            </div>
+        </div>
+
+        <p class="text-xs text-gray-500">환자를 검색한 후 모니터링 요청을 보낼 수 있습니다.</p>
+    </div>
+
+    <!-- 내가 보낸 요청 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i data-lucide="send" class="w-5 h-5 text-blue-600"></i>
+            보낸 요청
+            <span id="pendingRequestCount" class="text-sm font-normal text-gray-500"></span>
+        </h3>
+        <div id="pendingRequestList" class="space-y-3">
+            <!-- 대기 중인 요청 목록이 여기 표시됩니다 -->
+        </div>
+        <div id="emptyPendingRequests" class="hidden text-center py-8 text-gray-400">
+            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+            <p class="text-sm">대기 중인 요청이 없습니다</p>
+        </div>
+    </div>
+
+    <!-- 내 환자 목록 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i data-lucide="users" class="w-5 h-5 text-teal-600"></i>
+            등록 환자 목록
+            <span id="patientCount" class="text-sm font-normal text-gray-500"></span>
+        </h3>
+        <div id="patientList" class="space-y-3">
+            <!-- 환자 목록이 여기 표시됩니다 -->
+        </div>
+        <div id="emptyPatientList" class="hidden text-center py-8 text-gray-400">
+            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+            <p class="text-sm">등록된 환자가 없습니다</p>
+            <p class="text-xs">위에서 환자 아이디로 모니터링을 요청하세요</p>
+        </div>
+    </div>
+</div>
+
+<!-- 환자 상세 모달 -->
+    </div>
+</div>
+
+<!-- 환자 상세 모달 -->
+<div id="patientDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800" id="patientDetailName">환자 상세</h3>
+                <button onclick="closePatientDetail()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- 기본 정보 -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                <h4 class="font-semibold text-gray-700 mb-3">기본 정보</h4>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <span class="text-gray-500">아이디</span>
+                        <p class="font-medium" id="detailPatientId">-</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">나이</span>
+                        <p class="font-medium" id="detailPatientAge">-</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">성별</span>
+                        <p class="font-medium" id="detailPatientSex">-</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">키</span>
+                        <p class="font-medium" id="detailPatientHeight">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 최근 건강 데이터 -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                <h4 class="font-semibold text-gray-700 mb-3">최근 건강 데이터</h4>
+                <div id="detailHealthData" class="space-y-2 text-sm">
+                    <!-- 건강 데이터가 여기 표시됩니다 -->
+                </div>
+            </div>
+
+            <!-- 위험도 점수 -->
+            <div class="bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-3">뇌졸중 위험도</h4>
+                <div id="detailRiskScore" class="text-center">
+                    <div class="text-3xl font-bold mb-1" id="riskScoreValue">-</div>
+                    <div class="text-sm text-gray-500" id="riskScoreLabel">데이터 없음</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// storage는 script.js에 이미 정의되어 있으므로 재선언하지 않음
+let currentUser = null;
+let currentPatientDetail = null;
+let foundPatient = null; // 검색된 환자 정보 저장
+
+// 페이지 로드 시 데이터 로드
+document.addEventListener('DOMContentLoaded', async () => {
+    currentUser = storage.get('user');
+    
+    if (!currentUser || !currentUser.id) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    // 의사/보호자가 아니면 환자 페이지로 리다이렉트
+    if (currentUser.role === 'PATIENT') {
+        window.location.href = '/patient/home';
+        return;
+    }
+    
+    // 사용자 이름 표시
+    document.getElementById('userName').textContent = currentUser.name || '사용자';
+    document.getElementById('welcomeMessage').textContent = 
+        `${currentUser.name || '사용자'}님, 등록된 환자들의 건강 상태를 확인하세요`;
+    
+    // 데이터 로드
+    await loadMyPatients();
+    await loadPendingRequests();
+    
+    // 아이콘 렌더링
+    lucide.createIcons();
+});
+
+// 대기 중인 요청 로드
+async function loadPendingRequests() {
+    try {
+        const requests = await apiCall(`/monitoring/requests/sent/${currentUser.id}`, 'GET');
+        
+        // PENDING 상태만 필터링
+        const pendingRequests = requests.filter(req => req.status === 'PENDING');
+        
+        const requestList = document.getElementById('pendingRequestList');
+        const emptyList = document.getElementById('emptyPendingRequests');
+        const countEl = document.getElementById('pendingRequestCount');
+        
+        if (!pendingRequests || pendingRequests.length === 0) {
+            requestList.innerHTML = '';
+            emptyList.classList.remove('hidden');
+            countEl.textContent = '';
+            lucide.createIcons();
+            return;
+        }
+        
+        emptyList.classList.add('hidden');
+        countEl.textContent = `(${pendingRequests.length}건)`;
+        
+        requestList.innerHTML = pendingRequests.map(req => `
+            <div class="border border-gray-200 bg-gray-50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">${req.patient_name}</h4>
+                            <p class="text-xs text-gray-500">${formatDate(req.created_at)} 요청</p>
+                            <p class="text-xs text-blue-600">응답 대기 중</p>
+                        </div>
+                    </div>
+                    <button 
+                        onclick="cancelRequest('${req.id}', '${req.patient_name}')"
+                        class="text-red-500 hover:text-red-700 p-2"
+                        title="요청 취소"
+                    >
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('대기 중인 요청 로드 오류:', error);
+    }
+}
+
+// 요청 취소
+async function cancelRequest(requestId, patientName) {
+    if (!confirm(`${patientName}님에게 보낸 요청을 취소하시겠습니까?`)) {
+        return;
+    }
+    
+    try {
+        await apiCall(`/monitoring/request/${requestId}`, 'DELETE');
+        showAlert('요청이 취소되었습니다.', 'success');
+        await loadPendingRequests();
+    } catch (error) {
+        showAlert(error.message || '요청 취소에 실패했습니다.', 'error');
+    }
+}
+
+// 내 환자 목록 로드
+async function loadMyPatients() {
+    try {
+        const relations = await apiCall(`/monitoring/my-patients/${currentUser.id}`, 'GET');
+        
+        const patientList = document.getElementById('patientList');
+        const emptyList = document.getElementById('emptyPatientList');
+        const countEl = document.getElementById('patientCount');
+        
+        if (!relations || relations.length === 0) {
+            patientList.innerHTML = '';
+            emptyList.classList.remove('hidden');
+            countEl.textContent = '';
+            lucide.createIcons();
+            return;
+        }
+        
+        emptyList.classList.add('hidden');
+        countEl.textContent = `(${relations.length}명)`;
+        
+        patientList.innerHTML = relations.map(rel => `
+            <div class="border border-gray-200 rounded-xl p-4 hover:border-teal-300 transition cursor-pointer" 
+                 onclick="showPatientDetail('${rel.patient_id}', '${rel.patient_name}')">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-5 h-5 text-teal-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">${rel.patient_name}</h4>
+                            <p class="text-xs text-gray-500">${rel.patient_id}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            onclick="event.stopPropagation(); removeRelation('${rel.id}', '${rel.patient_name}')"
+                            class="text-red-500 hover:text-red-700 p-2"
+                            title="모니터링 해제"
+                        >
+                            <i data-lucide="user-minus" class="w-4 h-4"></i>
+                        </button>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        lucide.createIcons();
+    } catch (error) {
+        console.error('환자 목록 로드 오류:', error);
+    }
+}
+
+// 환자 검색
+async function searchPatient() {
+    const patientId = document.getElementById('patientSearchInput').value.trim();
+    
+    if (!patientId) {
+        showAlert('환자 아이디를 입력해주세요.', 'error');
+        return;
+    }
+    
+    try {
+        // 사용자 정보 조회
+        const patient = await apiCall(`/users/${patientId}`, 'GET');
+        
+        // 환자 역할 확인
+        if (patient.role !== 'PATIENT') {
+            showAlert('환자 역할의 사용자만 추가할 수 있습니다.', 'error');
+            document.getElementById('searchResult').classList.add('hidden');
+            foundPatient = null;
+            return;
+        }
+        
+        // 검색 결과 표시
+        foundPatient = patient;
+        document.getElementById('foundPatientName').textContent = patient.name || '이름 없음';
+        document.getElementById('foundPatientId').textContent = patient.id;
+        document.getElementById('foundPatientRole').textContent = '환자';
+        document.getElementById('searchResult').classList.remove('hidden');
+        
+        console.log('[검색 결과 표시 완료]');
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('[검색 실패]', error);
+        showAlert(error.message || '환자를 찾을 수 없습니다.', 'error');
+        document.getElementById('searchResult').classList.add('hidden');
+        foundPatient = null;
+    }
+}
+
+// 모니터링 요청 보내기 (검색된 환자에게)
+async function sendMonitoringRequest() {
+    if (!foundPatient) {
+        showAlert('먼저 환자를 검색해주세요.', 'error');
+        return;
+    }
+    
+    try {
+        const response = await apiCall('/monitoring/request', 'POST', {
+            patient_id: foundPatient.id,
+            requester_id: currentUser.id
+        });
+        
+        console.log('모니터링 요청 성공:', response);
+        showAlert(`${foundPatient.name}님에게 모니터링 요청을 보냈습니다.`, 'success');
+        
+        // 입력 필드와 검색 결과 초기화
+        document.getElementById('patientSearchInput').value = '';
+        document.getElementById('searchResult').classList.add('hidden');
+        foundPatient = null;
+        
+        // 대기 요청 목록 업데이트
+        await loadPendingRequests();
+        
+    } catch (error) {
+        console.error('모니터링 요청 실패:', error);
+        showAlert(error.message || '요청 전송에 실패했습니다.', 'error');
+    }
+}
+
+// 모니터링 관계 해제
+async function removeRelation(relationId, patientName) {
+    if (!confirm(`${patientName} 환자의 모니터링을 해제하시겠습니까?`)) {
+        return;
+    }
+    
+    try {
+        await apiCall(`/monitoring/relation/${relationId}`, 'DELETE');
+        showAlert('모니터링 관계가 해제되었습니다.', 'success');
+        await loadMyPatients();
+        await loadPendingRequests();
+    } catch (error) {
+        showAlert(error.message || '관계 해제에 실패했습니다.', 'error');
+    }
+}
+
+// 환자 상세 정보 보기
+async function showPatientDetail(patientId, patientName) {
+    try {
+        currentPatientDetail = patientId;
+        
+        // 환자 기본 정보 로드
+        const patientInfo = await apiCall(`/users/${patientId}`, 'GET');
+        
+        // 환자 건강 데이터 로드
+        const healthRecords = await apiCall(`/health/records/monitor/${currentUser.id}/patient/${patientId}`, 'GET');
+        
+        // 모달에 데이터 표시
+        document.getElementById('patientDetailName').textContent = patientName;
+        document.getElementById('detailPatientId').textContent = patientId;
+        
+        // 기본 정보
+        if (patientInfo.birth_date) {
+            const age = calculateAge(patientInfo.birth_date);
+            document.getElementById('detailPatientAge').textContent = `${age}세`;
+        }
+        document.getElementById('detailPatientSex').textContent = 
+            patientInfo.sex === 'M' ? '남성' : patientInfo.sex === 'F' ? '여성' : '-';
+        document.getElementById('detailPatientHeight').textContent = 
+            patientInfo.height_cm ? `${patientInfo.height_cm}cm` : '-';
+        
+        // 최근 건강 데이터
+        const healthDataEl = document.getElementById('detailHealthData');
+        if (healthRecords && healthRecords.length > 0) {
+            const latest = healthRecords[0];
+            healthDataEl.innerHTML = `
+                <div class="flex justify-between">
+                    <span class="text-gray-500">체중</span>
+                    <span class="font-medium">${latest.weight_kg}kg</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">혈압</span>
+                    <span class="font-medium">${latest.systolic_bp}/${latest.diastolic_bp} mmHg</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">혈당</span>
+                    <span class="font-medium">${latest.glucose_level} mg/dL</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">흡연</span>
+                    <span class="font-medium">${getSmokingStatus(latest.smoking)}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">측정일</span>
+                    <span class="font-medium">${formatDate(latest.created_at)}</span>
+                </div>
+            `;
+            
+            // 위험도 점수
+            if (latest.stroke_risk_score !== undefined) {
+                displayRiskScore(latest.stroke_risk_score);
+            }
+        } else {
+            healthDataEl.innerHTML = '<p class="text-gray-400 text-center py-4">건강 데이터가 없습니다</p>';
+            document.getElementById('riskScoreValue').textContent = '-';
+            document.getElementById('riskScoreLabel').textContent = '데이터 없음';
+        }
+        
+        // 모달 표시
+        document.getElementById('patientDetailModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('환자 상세 정보 로드 오류:', error);
+        showAlert(error.message || '환자 정보를 불러올 수 없습니다.', 'error');
+    }
+}
+
+function closePatientDetail() {
+    document.getElementById('patientDetailModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    currentPatientDetail = null;
+}
+
+// 위험도 점수 표시
+function displayRiskScore(score) {
+    const valueEl = document.getElementById('riskScoreValue');
+    const labelEl = document.getElementById('riskScoreLabel');
+    
+    valueEl.textContent = score.toFixed(1);
+    
+    if (score < 3) {
+        valueEl.className = 'text-3xl font-bold mb-1 text-green-600';
+        labelEl.textContent = '낮음';
+        labelEl.className = 'text-sm text-green-600';
+    } else if (score < 7) {
+        valueEl.className = 'text-3xl font-bold mb-1 text-yellow-600';
+        labelEl.textContent = '중간';
+        labelEl.className = 'text-sm text-yellow-600';
+    } else {
+        valueEl.className = 'text-3xl font-bold mb-1 text-red-600';
+        labelEl.textContent = '높음';
+        labelEl.className = 'text-sm text-red-600';
+    }
+}
+
+// 유틸리티 함수들
+function calculateAge(birthDate) {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+function getSmokingStatus(smoking) {
+    const status = { 0: '비흡연', 1: '과거 흡연', 2: '현재 흡연' };
+    return status[smoking] || '-';
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+function handleLogout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        storage.clear();
+        window.location.href = '/login';
+    }
+}
+</script>
+{% endblock %}

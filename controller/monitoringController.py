@@ -51,6 +51,19 @@ async def get_pending_requests(
     requests = await monitoringService.get_pending_requests_for_patient(db, patient_id)
     return requests
 
+# 모니터가 보낸 요청 조회
+@router.get("/requests/sent/{requester_id}", response_model=List[MonitoringRequestResponse])
+async def get_sent_requests(
+    requester_id: str,
+    db=Depends(get_db)
+):
+    """
+    의사/보호자가 보낸 모니터링 요청 목록
+    - **requester_id**: 요청자 ID (의사/보호자)
+    """
+    requests = await monitoringService.get_requests_by_requester(db, requester_id)
+    return requests
+
 # 모니터링 요청 승인/거부
 @router.post("/approve", response_model=MonitoringRequestResponse)
 async def approve_request(
@@ -69,6 +82,28 @@ async def approve_request(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"요청 처리 실패: {str(e)}")
+
+# 모니터링 요청 취소 (DELETE)
+@router.delete("/request/{request_id}", status_code=204)
+async def cancel_monitoring_request(
+    request_id: str,
+    db=Depends(get_db)
+):
+    """
+    모니터링 요청 취소 (요청자가 대기 중인 요청 취소)
+    - **request_id**: 요청 ID
+    """
+    try:
+        deleted = await monitoringService.delete_monitoring_request(db, request_id)
+        if not deleted:
+            print(f"⚠️ 요청 삭제 실패: request_id={request_id}")
+            raise HTTPException(status_code=500, detail=f"데이터베이스에서 요청(ID: {request_id})을 찾을 수 없거나 삭제에 실패했습니다.")
+        return Response(status_code=204)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        print(f"❌ 요청 취소 오류: {e}")
+        raise HTTPException(status_code=500, detail=f"요청 취소 실패: {str(e)}")
 
 # ==================== 모니터링 관계 ====================
 
@@ -109,11 +144,13 @@ async def delete_relation(
     - **relation_id**: 관계 ID
     """
     try:
-        success = await monitoringService.delete_monitoring_relation(db, relation_id)
-        if not success:
-            raise HTTPException(status_code=404, detail="모니터링 관계를 찾을 수 없습니다.")
+        deleted = await monitoringService.delete_monitoring_relation(db, relation_id)
+        if not deleted:
+            print(f"⚠️ 관계 삭제 실패: relation_id={relation_id}")
+            raise HTTPException(status_code=500, detail=f"데이터베이스에서 관계(ID: {relation_id})를 찾을 수 없거나 삭제에 실패했습니다.")
         return Response(status_code=204)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
+        print(f"❌ 관계 해제 오류: {e}")
         raise HTTPException(status_code=500, detail=f"관계 해제 실패: {str(e)}")

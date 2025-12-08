@@ -1,0 +1,29 @@
+<!-- 환자 페이지 공통 하단 네비게이션 -->
+{% block bottom_nav %}
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+    <div class="max-w-md mx-auto px-4 py-3">
+        <div class="flex items-center justify-around">
+            <a href="/patient/home" class="flex flex-col items-center gap-1 {% if active_tab == 'home' %}text-teal-600{% else %}text-gray-400 hover:text-teal-600 transition{% endif %}">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">홈</span>
+            </a>
+            <a href="/patient/health-data-input" class="flex flex-col items-center gap-1 {% if active_tab == 'input' %}text-teal-600{% else %}text-gray-400 hover:text-teal-600 transition{% endif %}">
+                <i data-lucide="plus-circle" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">기록</span>
+            </a>
+            <a href="/patient/health-data-inquiry" class="flex flex-col items-center gap-1 {% if active_tab == 'inquiry' %}text-teal-600{% else %}text-gray-400 hover:text-teal-600 transition{% endif %}">
+                <i data-lucide="line-chart" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">분석</span>
+            </a>
+            <a href="/patient/my-monitors" class="flex flex-col items-center gap-1 {% if active_tab == 'monitors' %}text-teal-600{% else %}text-gray-400 hover:text-teal-600 transition{% endif %}">
+                <i data-lucide="users" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">모니터</span>
+            </a>
+            <a href="/patient/basic-info" class="flex flex-col items-center gap-1 {% if active_tab == 'info' %}text-teal-600{% else %}text-gray-400 hover:text-teal-600 transition{% endif %}">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span class="text-xs font-medium">정보</span>
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}

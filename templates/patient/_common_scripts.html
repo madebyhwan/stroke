@@ -1,0 +1,171 @@
+<!-- 환자 페이지 공통 초기화 스크립트 -->
+<script>
+    
+// 환자용 모니터링 알림 기능
+// 대기 중인 모니터링 요청 확인
+async function checkPendingRequests() {
+    try {
+        const user = storage.get('user');
+        if (!user || !user.id) return;
+        
+        const requests = await apiCall(`/monitoring/requests/pending/${user.id}`, 'GET');
+        
+        const badge = document.getElementById('notificationBadge');
+        if (badge) {
+            if (requests && requests.length > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    } catch (error) {
+        console.error('알림 확인 오류:', error);
+    }
+}
+
+// 알림 모달 표시
+async function showNotifications() {
+    try {
+        const user = storage.get('user');
+        const requests = await apiCall(`/monitoring/requests/pending/${user.id}`, 'GET');
+        
+        const modalHtml = `
+            <div id="notificationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">모니터링 요청</h3>
+                            <button onclick="closeNotifications()" class="text-gray-400 hover:text-gray-600">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-3">
+                            ${requests && requests.length > 0 ? requests.map(req => `
+                                <div class="border border-gray-200 rounded-xl p-4">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-800">${req.requester_name}</h4>
+                                                <p class="text-xs text-gray-500">${req.requester_role === 'DOCTOR' ? '의사' : '보호자'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-3">건강 데이터 모니터링을 요청했습니다.</p>
+                                    <div class="flex gap-2">
+                                        <button 
+                                            onclick="handleApproveRequest('${req.id}', true)"
+                                            class="flex-1 bg-teal-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition"
+                                        >
+                                            승인
+                                        </button>
+                                        <button 
+                                            onclick="handleApproveRequest('${req.id}', false)"
+                                            class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
+                                        >
+                                            거부
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('') : `
+                                <div class="text-center py-8 text-gray-400">
+                                    <i data-lucide="bell-off" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                                    <p class="text-sm">새로운 알림이 없습니다</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 모달 추가
+        const existingModal = document.getElementById('notificationModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        document.body.style.overflow = 'hidden';
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('알림 로드 오류:', error);
+        showAlert('알림을 불러올 수 없습니다.', 'error');
+    }
+}
+
+// 알림 모달 닫기
+function closeNotifications() {
+    const modal = document.getElementById('notificationModal');
+    if (modal) {
+        modal.remove();
+    }
+    document.body.style.overflow = '';
+}
+
+// 모니터링 요청 승인/거부
+async function handleApproveRequest(requestId, approved) {
+    try {
+        await apiCall('/monitoring/approve', 'POST', {
+            request_id: requestId,
+            approved: approved
+        });
+        
+        showAlert(approved ? '모니터링을 승인했습니다.' : '요청을 거부했습니다.', 'success');
+        closeNotifications();
+        
+        // 알림 배지 업데이트
+        await checkPendingRequests();
+        
+        // my-monitors 페이지인 경우 목록도 새로고침
+        if (window.location.pathname === '/patient/my-monitors' && typeof loadMonitors === 'function') {
+            const user = storage.get('user');
+            await loadMonitors(user.id);
+            await loadPendingRequests(user.id);
+        }
+        
+    } catch (error) {
+        showAlert(error.message || '처리에 실패했습니다.', 'error');
+    }
+}
+
+// 페이지 로드 시 자동으로 알림 체크 (모든 환자 페이지에서 사용)
+function initPatientNotifications() {
+    checkPendingRequests();
+}
+
+// 공통 초기화 함수
+function initPatientPage() {
+    const user = storage.get('user');
+    
+    // 로그인 체크
+    if (!user || !user.id) {
+        window.location.href = '/login';
+        return false;
+    }
+    
+    // 사용자 이름 표시
+    const userNameElement = document.getElementById('userName');
+    if (userNameElement) {
+        userNameElement.textContent = user.name || '환자';
+    }
+    
+    // 알림 초기화
+    initPatientNotifications();
+    
+    return user;
+}
+
+// 로그아웃 함수
+function handleLogout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        storage.clear();
+        showAlert('로그아웃 되었습니다.', 'success');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1000);
+    }
+}
+</script>

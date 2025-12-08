@@ -13,7 +13,7 @@
     <!-- 헤더 -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="/patient/home" class="flex items-center gap-2 font-bold text-xl text-teal-600">
+            <a href="#" id="logoLink" class="flex items-center gap-2 font-bold text-xl text-teal-600">
                 <i data-lucide="heart-pulse"></i> 
                 <span>뇌졸중 관리</span>
             </a>
@@ -35,6 +35,26 @@
     {% block bottom_nav %}{% endblock %}
 
     <script src="{{ url_for('static', path='js/script.js') }}"></script>
+    <script>
+    // 로고 링크를 사용자 역할에 따라 설정
+    document.addEventListener('DOMContentLoaded', () => {
+        const logoLink = document.getElementById('logoLink');
+        if (logoLink) {
+            const user = storage.get('user');
+            if (user && user.role) {
+                if (user.role === 'PATIENT') {
+                    logoLink.href = '/patient/home';
+                } else if (user.role === 'DOCTOR' || user.role === 'CAREGIVER') {
+                    logoLink.href = '/monitor/home';
+                } else {
+                    logoLink.href = '/patient/home';
+                }
+            } else {
+                logoLink.href = '/login';
+            }
+        }
+    });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

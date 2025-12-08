@@ -12,7 +12,7 @@
 <div class="space-y-6 pb-10">
     <!-- 페이지 제목 -->
     <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full mb-3">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-3">
             <i data-lucide="user-cog" class="w-8 h-8 text-white"></i>
         </div>
         <h2 class="text-2xl font-bold text-gray-800">프로필 수정</h2>
@@ -20,15 +20,16 @@
     </div>
 
     <!-- 현재 사용자 정보 표시 -->
-    <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-100">
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
         <div class="flex items-center gap-4">
-            <div class="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center">
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
                 <span class="text-2xl text-white font-bold" id="userInitial">-</span>
             </div>
             <div>
                 <p class="text-sm text-gray-500">현재 로그인</p>
                 <p class="text-lg font-bold text-gray-800" id="currentName">-</p>
                 <p class="text-sm text-gray-600" id="currentId">-</p>
+                <p class="text-xs text-blue-600 font-medium mt-1" id="currentRole">-</p>
             </div>
         </div>
     </div>
@@ -36,7 +37,7 @@
     <!-- 이름 변경 폼 -->
     <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <i data-lucide="user" class="w-5 h-5 text-teal-600"></i>
+            <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
             이름 변경
         </h3>
         
@@ -52,14 +53,14 @@
                     required
                     minlength="2"
                     maxlength="20"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                     placeholder="변경할 이름을 입력하세요"
                 >
             </div>
 
             <button 
                 type="submit" 
-                class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 rounded-lg font-semibold hover:from-teal-700 hover:to-cyan-700 transition duration-300 flex items-center justify-center gap-2"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition duration-300 flex items-center justify-center gap-2"
             >
                 <span>이름 변경</span>
                 <i data-lucide="check" class="w-5 h-5"></i>
@@ -70,7 +71,7 @@
     <!-- 비밀번호 변경 폼 -->
     <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <i data-lucide="lock" class="w-5 h-5 text-teal-600"></i>
+            <i data-lucide="lock" class="w-5 h-5 text-blue-600"></i>
             비밀번호 변경
         </h3>
         
@@ -84,7 +85,7 @@
                     id="currentPassword" 
                     name="currentPassword" 
                     required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                     placeholder="현재 비밀번호"
                 >
             </div>
@@ -99,8 +100,8 @@
                     name="newPassword" 
                     required
                     minlength="4"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                    placeholder="새 비밀번호 (최소 4자)"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="새 비밀번호 (4자 이상)"
                 >
             </div>
 
@@ -113,41 +114,27 @@
                     id="confirmPassword" 
                     name="confirmPassword" 
                     required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                    placeholder="새 비밀번호 확인"
+                    minlength="4"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="비밀번호 재입력"
                 >
             </div>
 
             <button 
                 type="submit" 
-                class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-lg font-semibold hover:from-orange-700 hover:to-red-700 transition duration-300 flex items-center justify-center gap-2"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition duration-300 flex items-center justify-center gap-2"
             >
                 <span>비밀번호 변경</span>
-                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                <i data-lucide="key" class="w-5 h-5"></i>
             </button>
         </form>
     </div>
 
-    <!-- 안내 정보 -->
-    <div class="bg-yellow-50 rounded-2xl p-6 border border-yellow-100">
-        <div class="flex items-start gap-3">
-            <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-600 mt-0.5"></i>
-            <div class="text-sm text-gray-700">
-                <p class="font-semibold mb-2">보안 안내</p>
-                <ul class="space-y-1 text-gray-600">
-                    <li>• 비밀번호는 정기적으로 변경하는 것이 좋습니다</li>
-                    <li>• 다른 사람과 비밀번호를 공유하지 마세요</li>
-                    <li>• 추측하기 어려운 비밀번호를 사용하세요</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
     <!-- 로그아웃 버튼 -->
-    <div class="pt-4">
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
         <button 
             onclick="handleLogout()" 
-            class="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition flex items-center justify-center gap-2"
+            class="w-full bg-red-50 text-red-600 py-3 rounded-lg font-semibold hover:bg-red-100 transition duration-300 flex items-center justify-center gap-2"
         >
             <i data-lucide="log-out" class="w-5 h-5"></i>
             <span>로그아웃</span>
@@ -156,82 +143,61 @@
 </div>
 {% endblock %}
 
-{% block bottom_nav %}
-<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
-    <div class="max-w-md mx-auto px-4 py-3">
-        <div class="flex items-center justify-around">
-            <a href="/patient/home" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
-                <i data-lucide="home" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">홈</span>
-            </a>
-            <a href="/patient/health-data-input" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
-                <i data-lucide="plus-circle" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">기록</span>
-            </a>
-            <a href="/patient/health-data-inquiry" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
-                <i data-lucide="line-chart" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">분석</span>
-            </a>
-            <a href="/patient/basic-info" class="flex flex-col items-center gap-1 text-gray-400 hover:text-teal-600 transition">
-                <i data-lucide="user" class="w-6 h-6"></i>
-                <span class="text-xs font-medium">정보</span>
-            </a>
-        </div>
-    </div>
-</nav>
-{% endblock %}
-
 {% block extra_js %}
 <script>
-let currentUser = null;
-
 // 페이지 로드 시 사용자 정보 표시
-document.addEventListener('DOMContentLoaded', async () => {
-    currentUser = storage.get('user');
+document.addEventListener('DOMContentLoaded', () => {
+    const user = storage.get('user');
     
-    if (!currentUser || !currentUser.id) {
+    if (!user || !user.id) {
         window.location.href = '/login';
         return;
     }
     
-    // 사용자 정보 표시
-    document.getElementById('currentName').textContent = currentUser.name || '-';
-    document.getElementById('currentId').textContent = `@${currentUser.id}`;
-    document.getElementById('userInitial').textContent = currentUser.name ? currentUser.name.charAt(0) : '-';
-    document.getElementById('newName').value = currentUser.name || '';
+    // 현재 사용자 정보 표시
+    document.getElementById('currentName').textContent = user.name || '-';
+    document.getElementById('currentId').textContent = user.id || '-';
+    document.getElementById('userInitial').textContent = user.name ? user.name.charAt(0).toUpperCase() : '-';
+    
+    const roleText = user.role === 'DOCTOR' ? '의사' : user.role === 'CAREGIVER' ? '보호자' : '환자';
+    document.getElementById('currentRole').textContent = roleText;
+    
+    lucide.createIcons();
 });
 
 // 이름 변경
 async function handleNameChange(event) {
     event.preventDefault();
     
+    const user = storage.get('user');
     const newName = document.getElementById('newName').value.trim();
     
     if (!newName) {
-        showAlert('이름을 입력해주세요.', 'error');
+        showAlert('새 이름을 입력해주세요.', 'error');
         return;
     }
     
-    if (newName === currentUser.name) {
+    if (newName === user.name) {
         showAlert('현재 이름과 동일합니다.', 'error');
         return;
     }
     
     try {
-        const response = await apiCall(`/users/${currentUser.id}`, 'PUT', {
-            id: currentUser.id,
+        await apiCall(`/users/${user.id}`, 'PUT', {
+            id: user.id,
             name: newName
         });
         
         // 로컬 스토리지 업데이트
-        currentUser.name = response.name;
-        storage.set('user', currentUser);
+        user.name = newName;
+        storage.set('user', user);
         
         // UI 업데이트
-        document.getElementById('currentName').textContent = response.name;
-        document.getElementById('userInitial').textContent = response.name.charAt(0);
+        document.getElementById('currentName').textContent = newName;
+        document.getElementById('userInitial').textContent = newName.charAt(0).toUpperCase();
+        document.getElementById('newName').value = '';
         
-        showAlert('이름이 변경되었습니다!', 'success');
+        showAlert('이름이 변경되었습니다.', 'success');
         
     } catch (error) {
         showAlert(error.message || '이름 변경에 실패했습니다.', 'error');
@@ -242,11 +208,11 @@ async function handleNameChange(event) {
 async function handlePasswordChange(event) {
     event.preventDefault();
     
+    const user = storage.get('user');
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
-    // 유효성 검사
     if (!currentPassword || !newPassword || !confirmPassword) {
         showAlert('모든 필드를 입력해주세요.', 'error');
         return;
@@ -262,30 +228,18 @@ async function handlePasswordChange(event) {
         return;
     }
     
-    if (currentPassword === newPassword) {
-        showAlert('현재 비밀번호와 새 비밀번호가 같습니다.', 'error');
-        return;
-    }
-    
-    // 현재 비밀번호 확인
     try {
+        // 현재 비밀번호 확인을 위해 로그인 시도
         await apiCall('/users/login', 'POST', {
-            id: currentUser.id,
+            id: user.id,
             password: currentPassword
         });
-    } catch (error) {
-        showAlert('현재 비밀번호가 올바르지 않습니다.', 'error');
-        return;
-    }
-    
-    // 비밀번호 변경
-    try {
-        await apiCall(`/users/${currentUser.id}`, 'PUT', {
-            id: currentUser.id,
+        
+        // 비밀번호 변경
+        await apiCall(`/users/${user.id}`, 'PUT', {
+            id: user.id,
             password: newPassword
         });
-        
-        showAlert('비밀번호가 변경되었습니다! 다시 로그인해주세요.', 'success');
         
         // 즉시 로그아웃
         storage.clear();
@@ -302,6 +256,10 @@ function handleLogout() {
         storage.clear();
         window.location.href = '/login';
     }
+}
+
+function goBack() {
+    window.history.back();
 }
 </script>
 {% endblock %}

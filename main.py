@@ -84,6 +84,18 @@ async def health_data_inquiry(request: Request):
 async def profile_edit(request: Request):
     return templates.TemplateResponse("patient/profile_edit.html", {"request": request})
 
+@app.get("/patient/my-monitors", response_class=HTMLResponse)
+async def my_monitors(request: Request):
+    return templates.TemplateResponse("patient/my_monitors.html", {"request": request})
+
+@app.get("/monitor/home", response_class=HTMLResponse)
+async def monitor_home(request: Request):
+    return templates.TemplateResponse("monitor/home.html", {"request": request})
+
+@app.get("/monitor/profile", response_class=HTMLResponse)
+async def monitor_profile(request: Request):
+    return templates.TemplateResponse("monitor/profile_edit.html", {"request": request})
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
