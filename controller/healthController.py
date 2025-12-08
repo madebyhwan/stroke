@@ -54,16 +54,16 @@ async def get_latest_health_record(user_id: str, db=Depends(get_db)):
     return record
 
 # 건강 측정 데이터 삭제
-@router.delete("/records/{record_id}", status_code=204)
+@router.delete("/records/{record_id}", response_model=HealthRecordResponse, status_code=200)
 async def delete_health_record(record_id: str, db=Depends(get_db)):
     """
     건강 측정 데이터 삭제
     - **record_id**: 건강 측정 데이터 ID
     """
-    success = await healthService.delete_health_record(db, record_id)
-    if not success:
+    deleted_record = await healthService.delete_health_record(db, record_id)
+    if not deleted_record:
         raise HTTPException(status_code=404, detail="건강 측정 데이터를 찾을 수 없습니다.")
-    return Response(status_code=204)
+    return deleted_record
 
 # 모니터링 권한으로 환자 건강 데이터 조회
 @router.get("/records/monitor/{monitor_id}/patient/{patient_id}", response_model=List[HealthRecordResponse])

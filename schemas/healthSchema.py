@@ -7,7 +7,7 @@ from datetime import datetime
 class HealthRecordInput(BaseModel):
     """건강 측정 데이터 입력"""
     user_id: str
-    weight_kg: int      # 체중 (kg)
+    weight_kg: float    # 체중 (kg)
     systolic_bp: int    # 수축기 혈압 (mmHg)
     diastolic_bp: int   # 이완기 혈압 (mmHg)
     glucose_level: int  # 혈당 (mg/dL)

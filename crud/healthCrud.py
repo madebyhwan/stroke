@@ -45,7 +45,10 @@ async def get_latest_health_record(db: AsyncIOMotorDatabase, user_id: str) -> Op
     return None
 
 # 건강 측정 데이터 삭제
-async def delete_health_record(db: AsyncIOMotorDatabase, record_id: str) -> bool:
+async def delete_health_record(db: AsyncIOMotorDatabase, record_id: str) -> Optional[HealthRecordDB]:
     """건강 측정 데이터 삭제"""
-    result = await db.health_records.delete_one({"_id": record_id})
-    return result.deleted_count > 0
+    record = await db.health_records.find_one({"_id": record_id})
+    if record:
+        result = await db.health_records.delete_one({"_id": record_id})
+        return HealthRecordDB(**record) if result.deleted_count > 0 else None
+    return None

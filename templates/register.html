@@ -2,6 +2,27 @@
 
 {% block title %}회원가입 - 뇌졸중 관리 시스템{% endblock %}
 
+{% block extra_css %}
+<style>
+/* 사파리 날짜 입력 필드 스타일 수정 */
+input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 48px;
+    line-height: 1.5;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: 0;
+    padding-left: 0;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen py-8 -mt-4">
     <div class="w-full max-w-md mx-auto fade-in">
@@ -33,7 +54,7 @@
                         id="userId" 
                         name="id" 
                         required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                         placeholder="아이디를 입력하세요"
                     >
                 </div>
@@ -47,7 +68,7 @@
                         id="password" 
                         name="password" 
                         required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                         placeholder="비밀번호를 입력하세요"
                     >
                 </div>
@@ -61,7 +82,7 @@
                         id="passwordConfirm" 
                         name="passwordConfirm" 
                         required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                         placeholder="비밀번호를 다시 입력하세요"
                     >
                 </div>
@@ -75,27 +96,134 @@
                         id="name" 
                         name="name" 
                         required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                         placeholder="이름을 입력하세요"
                     >
                 </div>
 
                 <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
                         역할 <span class="text-red-500">*</span>
                     </label>
-                    <select 
-                        id="role" 
-                        name="role" 
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                    >
-                        <option value="">선택하세요</option>
-                        <option value="PATIENT">환자</option>
-                        <option value="DOCTOR">의사</option>
-                        <option value="CAREGIVER">보호자</option>
-                    </select>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                            <input type="radio" name="role" value="PATIENT" required class="hidden peer" onchange="toggleHealthInfoFields()">
+                            <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">환자</span>
+                        </label>
+                        <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                            <input type="radio" name="role" value="DOCTOR" required class="hidden peer" onchange="toggleHealthInfoFields()">
+                            <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">의사</span>
+                        </label>
+                        <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                            <input type="radio" name="role" value="CAREGIVER" required class="hidden peer" onchange="toggleHealthInfoFields()">
+                            <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">보호자</span>
+                        </label>
+                    </div>
                 </div>
+
+                <!-- 환자 전용 기본 건강 정보 입력 폼 -->
+                <div id="healthInfoSection" class="hidden space-y-4 pt-2 border-t-2 border-gray-200">
+                    <div class="text-center py-2">
+                        <h3 class="text-lg font-bold text-gray-800">기본 건강 정보</h3>
+                        <p class="text-xs text-gray-500 mt-1">환자 회원가입 시 필수 입력 항목입니다</p>
+                    </div>
+
+                    <!-- 성별 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                            성별 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
+                                <input type="radio" name="sex" value="M" class="w-4 h-4 text-teal-600">
+                                <span class="text-sm">남성</span>
+                            </label>
+                            <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
+                                <input type="radio" name="sex" value="F" class="w-4 h-4 text-teal-600">
+                                <span class="text-sm">여성</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 생년월일 -->
+                    <div>
+                        <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-2">
+                            생년월일 <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            id="birth_date" 
+                            name="birth_date" 
+                            max="{{ today }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                        >
+                    </div>
+
+                    <!-- 키 -->
+                    <div>
+                        <label for="height_cm" class="block text-sm font-medium text-gray-700 mb-2">
+                            키 (cm) <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="height_cm" 
+                            name="height_cm" 
+                            min="100"
+                            max="250"
+                            step="1"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                            placeholder="예: 170"
+                        >
+                    </div>
+
+                    <!-- 질병 이력 -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">질병 이력</label>
+                        
+                        <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" id="stroke_history" name="stroke_history" class="w-4 h-4 text-teal-600 rounded">
+                            <span class="text-sm text-gray-700">뇌졸중 이력</span>
+                        </label>
+
+                        <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" id="hypertension" name="hypertension" class="w-4 h-4 text-teal-600 rounded">
+                            <span class="text-sm text-gray-700">고혈압</span>
+                        </label>
+
+                        <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" id="heart_disease" name="heart_disease" class="w-4 h-4 text-teal-600 rounded">
+                            <span class="text-sm text-gray-700">심장 질환</span>
+                        </label>
+
+                        <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="checkbox" id="diabetes" name="diabetes" class="w-4 h-4 text-teal-600 rounded">
+                            <span class="text-sm text-gray-700">당뇨병</span>
+                        </label>
+                    </div>
+
+                    <!-- 흡연 이력 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                            흡연 이력 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                                <input type="radio" name="smoking_history" value="NON_SMOKER" class="hidden peer">
+                                <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">비흡연</span>
+                            </label>
+                            <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                                <input type="radio" name="smoking_history" value="PAST_SMOKER" class="hidden peer">
+                                <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">과거 흡연</span>
+                            </label>
+                            <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                                <input type="radio" name="smoking_history" value="SMOKER" class="hidden peer">
+                                <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">현재 흡연</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+
 
                 <div class="pt-4">
                     <button 
@@ -139,6 +267,31 @@
 
 {% block extra_js %}
 <script>
+function toggleHealthInfoFields() {
+    const roleRadio = document.querySelector('input[name="role"]:checked');
+    const healthInfoSection = document.getElementById('healthInfoSection');
+    
+    if (roleRadio && roleRadio.value === 'PATIENT') {
+        healthInfoSection.classList.remove('hidden');
+        // 환자일 경우 필수 입력으로 설정 - 라디오 버튼은 name으로 required 설정
+        const sexRadios = document.querySelectorAll('input[name="sex"]');
+        const smokingRadios = document.querySelectorAll('input[name="smoking_history"]');
+        sexRadios.forEach(radio => radio.required = true);
+        smokingRadios.forEach(radio => radio.required = true);
+        document.getElementById('birth_date').required = true;
+        document.getElementById('height_cm').required = true;
+    } else {
+        healthInfoSection.classList.add('hidden');
+        // 환자가 아닐 경우 필수 해제
+        const sexRadios = document.querySelectorAll('input[name="sex"]');
+        const smokingRadios = document.querySelectorAll('input[name="smoking_history"]');
+        sexRadios.forEach(radio => radio.required = false);
+        smokingRadios.forEach(radio => radio.required = false);
+        document.getElementById('birth_date').required = false;
+        document.getElementById('height_cm').required = false;
+    }
+}
+
 async function handleRegister(event) {
     event.preventDefault();
     
@@ -146,13 +299,15 @@ async function handleRegister(event) {
     const password = document.getElementById('password').value.trim();
     const passwordConfirm = document.getElementById('passwordConfirm').value.trim();
     const name = document.getElementById('name').value.trim();
-    const role = document.getElementById('role').value;
+    const roleRadio = document.querySelector('input[name="role"]:checked');
     
     // 유효성 검사
-    if (!userId || !password || !name || !role) {
+    if (!userId || !password || !name || !roleRadio) {
         showAlert('모든 필수 항목을 입력해주세요.', 'error');
         return;
     }
+    
+    const role = roleRadio.value;
     
     if (password !== passwordConfirm) {
         showAlert('비밀번호가 일치하지 않습니다.', 'error');
@@ -163,14 +318,39 @@ async function handleRegister(event) {
         showAlert('비밀번호는 최소 4자 이상이어야 합니다.', 'error');
         return;
     }
+
+    // 회원가입 데이터 준비
+    const registerData = {
+        id: userId,
+        password: password,
+        name: name,
+        role: role
+    };
+
+    // 환자일 경우 기본 건강 정보 추가
+    if (role === 'PATIENT') {
+        const sexRadio = document.querySelector('input[name="sex"]:checked');
+        const birthDate = document.getElementById('birth_date').value;
+        const heightCm = document.getElementById('height_cm').value;
+        const smokingRadio = document.querySelector('input[name="smoking_history"]:checked');
+
+        if (!sexRadio || !birthDate || !heightCm || !smokingRadio) {
+            showAlert('환자는 기본 건강 정보를 모두 입력해야 합니다.', 'error');
+            return;
+        }
+
+        registerData.sex = sexRadio.value;
+        registerData.birth_date = birthDate;
+        registerData.height_cm = parseInt(heightCm);
+        registerData.smoking_history = smokingRadio.value;
+        registerData.stroke_history = document.getElementById('stroke_history').checked;
+        registerData.hypertension = document.getElementById('hypertension').checked;
+        registerData.heart_disease = document.getElementById('heart_disease').checked;
+        registerData.diabetes = document.getElementById('diabetes').checked;
+    }
     
     try {
-        const response = await apiCall('/users/register', 'POST', {
-            id: userId,
-            password: password,
-            name: name,
-            role: role
-        });
+        const response = await apiCall('/users/register', 'POST', registerData);
         
         showAlert('회원가입 성공! 로그인 페이지로 이동합니다.', 'success');
         

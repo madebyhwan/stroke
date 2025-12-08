@@ -77,9 +77,22 @@ async def get_latest_health_record(db: AsyncIOMotorDatabase, user_id: str) -> Op
     )
 
 # 건강 기록 삭제
-async def delete_health_record(db: AsyncIOMotorDatabase, record_id: str) -> bool:
+async def delete_health_record(db: AsyncIOMotorDatabase, record_id: str) -> Optional[HealthRecordResponse]:
     """건강 기록 삭제"""
-    return await healthCrud.delete_health_record(db, record_id)
+    deleted_record = await healthCrud.delete_health_record(db, record_id)
+    if not deleted_record:
+        return None
+    
+    return HealthRecordResponse(
+        id=deleted_record.id,
+        user_id=deleted_record.user_id,
+        weight_kg=deleted_record.weight_kg,
+        systolic_bp=deleted_record.systolic_bp,
+        diastolic_bp=deleted_record.diastolic_bp,
+        glucose_level=deleted_record.glucose_level,
+        smoking=deleted_record.smoking,
+        created_at=deleted_record.created_at
+    )
 
 # 모니터링 권한으로 환자 건강 기록 조회
 async def get_monitored_patient_records(

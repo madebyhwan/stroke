@@ -15,13 +15,38 @@ async def register_user(db: AsyncIOMotorDatabase, user_data: UserCreate) -> User
     if existing_user:
         raise ValueError("이미 존재하는 아이디입니다.")
 
+    # 환자일 경우 기본 건강 정보 필수 확인
+    if user_data.role == "PATIENT":
+        if not all([
+            user_data.sex,
+            user_data.birth_date,
+            user_data.height_cm,
+            user_data.smoking_history is not None
+        ]):
+            raise ValueError("환자는 기본 건강 정보(성별, 생년월일, 키, 흡연 이력)를 모두 입력해야 합니다.")
+
     # UserDB 모델로 변환
-    user_db = UserDB(
-        id=user_data.id,
-        password=user_data.password,
-        name=user_data.name,
-        role=user_data.role
-    )
+    user_dict = {
+        "id": user_data.id,
+        "password": user_data.password,
+        "name": user_data.name,
+        "role": user_data.role
+    }
+    
+    # 환자일 경우 건강 정보 추가
+    if user_data.role == "PATIENT":
+        user_dict.update({
+            "sex": user_data.sex,
+            "birth_date": user_data.birth_date,
+            "height_cm": user_data.height_cm,
+            "smoking_history": user_data.smoking_history,
+            "stroke_history": user_data.stroke_history if user_data.stroke_history is not None else False,
+            "hypertension": user_data.hypertension if user_data.hypertension is not None else False,
+            "heart_disease": user_data.heart_disease if user_data.heart_disease is not None else False,
+            "diabetes": user_data.diabetes if user_data.diabetes is not None else False
+        })
+    
+    user_db = UserDB(**user_dict)
     
     # DB 저장
     created_user = await userCrud.create_user(db, user_db)

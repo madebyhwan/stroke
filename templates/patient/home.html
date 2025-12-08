@@ -24,6 +24,82 @@
         <i data-lucide="heart-pulse" class="absolute -right-4 -bottom-4 w-32 h-32 text-white/10"></i>
     </div>
 
+    <!-- FAST 검사 모달 -->
+    <div id="fastModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">FAST 뇌졸중 자가검사</h3>
+                    <button onclick="closeFastModal()" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-sm text-red-800 font-medium">⚠️ 다음 증상 중 하나라도 있다면 즉시 119에 연락하세요!</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="font-bold text-teal-600">F</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">Face (얼굴)</h4>
+                                    <p class="text-sm text-gray-600">웃을 때 한쪽 얼굴이 처지나요?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="font-bold text-teal-600">A</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">Arm (팔)</h4>
+                                    <p class="text-sm text-gray-600">양팔을 들 때 한쪽 팔이 내려가나요?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="font-bold text-teal-600">S</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">Speech (언어)</h4>
+                                    <p class="text-sm text-gray-600">말할 때 발음이 어눌하거나 이상한가요?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="font-bold text-red-600">T</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">Time (시간)</h4>
+                                    <p class="text-sm text-gray-600">위 증상이 있다면 즉시 119에 전화하세요!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 space-y-2">
+                        <button onclick="closeFastModal()" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 rounded-lg font-semibold hover:from-teal-700 hover:to-cyan-700 transition">
+                            확인했습니다
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 주요 기능 그리드 -->
     <div class="grid grid-cols-2 gap-4">
         <!-- 건강 데이터 입력 -->
@@ -130,6 +206,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('welcomeMessage').textContent = 
         `${user.name || '환자'}님, 오늘도 건강한 하루 보내세요`;
     
+    // FAST 검사 모달 표시 (오늘 하루 보지 않기 체크)
+    const today = new Date().toDateString();
+    const fastModalHidden = storage.get('fastModalHidden');
+    
+    if (!fastModalHidden || fastModalHidden !== today) {
+        showFastModal();
+    }
+    
     // 최근 건강 기록 로드
     try {
         const records = await apiCall(`/health/records/user/${user.id}`, 'GET');
@@ -147,6 +231,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+function showFastModal() {
+    const modal = document.getElementById('fastModal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    lucide.createIcons();
+}
+
+function closeFastModal() {
+    const today = new Date().toDateString();
+    storage.set('fastModalHidden', today);
+    
+    const modal = document.getElementById('fastModal');
+    modal.classList.add('hidden');
+    
+    document.body.style.overflow = '';
+}
+
 function displayRecentRecords(records) {
     const container = document.getElementById('recentRecords');
     
@@ -163,7 +264,7 @@ function displayRecentRecords(records) {
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-800">혈압: ${record.systolic_bp}/${record.diastolic_bp}</p>
-                    <p class="text-xs text-gray-500">${formatDate(record.measured_at)}</p>
+                    <p class="text-xs text-gray-500">${formatDate(record.created_at)}</p>
                 </div>
             </div>
             <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>

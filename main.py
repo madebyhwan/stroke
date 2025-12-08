@@ -83,3 +83,7 @@ async def health_data_inquiry(request: Request):
 @app.get("/patient/profile", response_class=HTMLResponse)
 async def profile_edit(request: Request):
     return templates.TemplateResponse("patient/profile_edit.html", {"request": request})
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

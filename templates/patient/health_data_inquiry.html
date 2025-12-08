@@ -61,8 +61,8 @@
                     <i data-lucide="droplet" class="w-5 h-5 text-blue-600"></i>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500">평균 혈압</p>
-                    <p class="text-lg font-bold text-gray-800" id="avgBP">-/-</p>
+                    <p class="text-xs text-gray-500">최근 혈압</p>
+                    <p class="text-lg font-bold text-gray-800" id="recentBP">-/-</p>
                 </div>
             </div>
         </div>
@@ -73,8 +73,8 @@
                     <i data-lucide="activity" class="w-5 h-5 text-green-600"></i>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500">평균 혈당</p>
-                    <p class="text-lg font-bold text-gray-800" id="avgGlucose">-</p>
+                    <p class="text-xs text-gray-500">최근 혈당</p>
+                    <p class="text-lg font-bold text-gray-800" id="recentGlucose">-</p>
                 </div>
             </div>
         </div>
@@ -199,27 +199,24 @@ async function refreshData() {
 
 function displayStatistics(records) {
     const totalRecordsEl = document.getElementById('totalRecords');
-    const avgBPEl = document.getElementById('avgBP');
-    const avgGlucoseEl = document.getElementById('avgGlucose');
+    const recentBPEl = document.getElementById('recentBP');
+    const recentGlucoseEl = document.getElementById('recentGlucose');
     const recentWeightEl = document.getElementById('recentWeight');
     
-    totalRecordsEl.textContent = records.length;
+    totalRecordsEl.textContent = `${records.length}회`;
     
     if (records.length === 0) {
-        avgBPEl.textContent = '-/-';
-        avgGlucoseEl.textContent = '- mg/dL';
-        recentWeightEl.textContent = '- kg';
+        recentBPEl.textContent = '-/-';
+        recentGlucoseEl.textContent = '-';
+        recentWeightEl.textContent = '-';
         return;
     }
     
-    // 평균 혈압 계산
-    const avgSystolic = Math.round(records.reduce((sum, r) => sum + r.systolic_bp, 0) / records.length);
-    const avgDiastolic = Math.round(records.reduce((sum, r) => sum + r.diastolic_bp, 0) / records.length);
-    avgBPEl.textContent = `${avgSystolic}/${avgDiastolic}`;
+    // 최근 혈압
+    recentBPEl.textContent = `${records[0].systolic_bp}/${records[0].diastolic_bp} mmHg`;
     
-    // 평균 혈당 계산
-    const avgGlucose = Math.round(records.reduce((sum, r) => sum + r.glucose_level, 0) / records.length);
-    avgGlucoseEl.textContent = `${avgGlucose} mg/dL`;
+    // 최근 혈당
+    recentGlucoseEl.textContent = `${records[0].glucose_level} mg/dL`;
     
     // 최근 체중
     recentWeightEl.textContent = `${records[0].weight_kg} kg`;

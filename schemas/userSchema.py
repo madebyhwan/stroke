@@ -13,6 +13,15 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    # 환자일 경우 기본 건강 정보 (선택적)
+    sex: Optional[sexEnum] = None
+    birth_date: Optional[date] = None
+    height_cm: Optional[int] = None
+    stroke_history: Optional[bool] = None
+    hypertension: Optional[bool] = None
+    heart_disease: Optional[bool] = None
+    smoking_history: Optional[smokingEnum] = None
+    diabetes: Optional[bool] = None
 
 class UserLogin(BaseModel):
     id: str

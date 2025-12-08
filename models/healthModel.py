@@ -8,7 +8,7 @@ class HealthRecordDB(BaseModel):
     """시계열 건강 측정 기록"""
     id: str = Field(..., alias="_id")
     user_id: str                # users 컬렉션 참조
-    weight_kg: int = 70         # 체중
+    weight_kg: float = 70.0     # 체중
     systolic_bp: int = 120      # 수축기 혈압
     diastolic_bp: int = 80      # 이완기 혈압
     glucose_level: int = 100    # 혈당

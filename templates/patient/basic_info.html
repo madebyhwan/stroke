@@ -2,6 +2,27 @@
 
 {% block title %}기본 정보 입력 - 뇌졸중 관리{% endblock %}
 
+{% block extra_css %}
+<style>
+/* 사파리 날짜 입력 필드 스타일 수정 */
+input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 48px;
+    line-height: 1.5;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: 0;
+    padding-left: 0;
+}
+</style>
+{% endblock %}
+
 {% block header_actions %}
 <button onclick="goBack()" class="text-gray-600 hover:text-gray-800">
     <i data-lucide="arrow-left" class="w-5 h-5"></i>
@@ -16,7 +37,7 @@
             <i data-lucide="user-circle" class="w-8 h-8 text-white"></i>
         </div>
         <h2 class="text-2xl font-bold text-gray-800">기본 건강 정보</h2>
-        <p class="text-gray-500 text-sm mt-1">고정적인 건강 정보를 입력하세요</p>
+        <p class="text-gray-500 text-sm mt-1">기본적인 건강 정보를 입력하세요</p>
     </div>
 
     <!-- 기본 정보 폼 -->
@@ -25,19 +46,19 @@
             
             <!-- 성별 -->
             <div>
-                <label for="sex" class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
                     성별 <span class="text-red-500">*</span>
                 </label>
-                <select 
-                    id="sex" 
-                    name="sex" 
-                    required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                >
-                    <option value="">선택하세요</option>
-                    <option value="MALE">남성</option>
-                    <option value="FEMALE">여성</option>
-                </select>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
+                        <input type="radio" name="sex" value="M" required class="w-4 h-4 text-teal-600">
+                        <span class="text-sm">남성</span>
+                    </label>
+                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
+                        <input type="radio" name="sex" value="F" required class="w-4 h-4 text-teal-600">
+                        <span class="text-sm">여성</span>
+                    </label>
+                </div>
             </div>
 
             <!-- 생년월일 -->
@@ -73,90 +94,54 @@
                 >
             </div>
 
-            <!-- 뇌졸중 병력 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">
-                    뇌졸중 병력 <span class="text-red-500">*</span>
+            <!-- 질병 이력 섹션 -->
+            <div class="space-y-3 pt-2">
+                <label class="block text-sm font-medium text-gray-700">질병 이력</label>
+                
+                <!-- 뇌졸중 병력 -->
+                <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" name="stroke_history" class="w-4 h-4 text-teal-600 rounded">
+                    <span class="text-sm text-gray-700">뇌졸중 이력</span>
                 </label>
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="stroke_history" value="true" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">있음</span>
-                    </label>
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="stroke_history" value="false" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">없음</span>
-                    </label>
-                </div>
-            </div>
 
-            <!-- 고혈압 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">
-                    고혈압 <span class="text-red-500">*</span>
+                <!-- 고혈압 -->
+                <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" name="hypertension" class="w-4 h-4 text-teal-600 rounded">
+                    <span class="text-sm text-gray-700">고혈압</span>
                 </label>
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="hypertension" value="true" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">있음</span>
-                    </label>
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="hypertension" value="false" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">없음</span>
-                    </label>
-                </div>
-            </div>
 
-            <!-- 심장질환 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">
-                    심장질환 <span class="text-red-500">*</span>
+                <!-- 심장질환 -->
+                <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" name="heart_disease" class="w-4 h-4 text-teal-600 rounded">
+                    <span class="text-sm text-gray-700">심장 질환</span>
                 </label>
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="heart_disease" value="true" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">있음</span>
-                    </label>
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="heart_disease" value="false" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">없음</span>
-                    </label>
-                </div>
-            </div>
 
-            <!-- 당뇨병 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">
-                    당뇨병 <span class="text-red-500">*</span>
+                <!-- 당뇨병 -->
+                <label class="flex items-center gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" name="diabetes" class="w-4 h-4 text-teal-600 rounded">
+                    <span class="text-sm text-gray-700">당뇨병</span>
                 </label>
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="diabetes" value="true" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">있음</span>
-                    </label>
-                    <label class="flex items-center gap-2 flex-1 p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition">
-                        <input type="radio" name="diabetes" value="false" required class="w-4 h-4 text-teal-600">
-                        <span class="text-sm">없음</span>
-                    </label>
-                </div>
             </div>
 
             <!-- 흡연 이력 -->
             <div>
-                <label for="smoking_history" class="block text-sm font-medium text-gray-700 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
                     흡연 이력 <span class="text-red-500">*</span>
                 </label>
-                <select 
-                    id="smoking_history" 
-                    name="smoking_history" 
-                    required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                >
-                    <option value="">선택하세요</option>
-                    <option value="NEVER">비흡연</option>
-                    <option value="FORMER">과거 흡연</option>
-                    <option value="CURRENT">현재 흡연</option>
-                </select>
+                <div class="grid grid-cols-3 gap-3">
+                    <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                        <input type="radio" name="smoking_history" value="NON_SMOKER" required class="hidden peer">
+                        <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">비흡연</span>
+                    </label>
+                    <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                        <input type="radio" name="smoking_history" value="PAST_SMOKER" required class="hidden peer">
+                        <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">과거 흡연</span>
+                    </label>
+                    <label class="flex items-center justify-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-teal-500 transition text-center">
+                        <input type="radio" name="smoking_history" value="SMOKER" required class="hidden peer">
+                        <span class="text-sm peer-checked:font-semibold peer-checked:text-teal-600">현재 흡연</span>
+                    </label>
+                </div>
             </div>
 
             <!-- 제출 버튼 -->
@@ -226,23 +211,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // 폼에 기존 데이터 채우기
         if (healthInfo) {
-            document.getElementById('sex').value = healthInfo.sex || '';
-            document.getElementById('birth_date').value = healthInfo.birth_date || '';
-            document.getElementById('height_cm').value = healthInfo.height_cm || '';
-            document.getElementById('smoking_history').value = healthInfo.smoking_history || '';
+            // 성별 라디오 버튼
+            if (healthInfo.sex) {
+                const sexRadio = document.querySelector(`input[name="sex"][value="${healthInfo.sex}"]`);
+                if (sexRadio) sexRadio.checked = true;
+            }
             
-            // 라디오 버튼
-            if (healthInfo.stroke_history !== undefined) {
-                document.querySelector(`input[name="stroke_history"][value="${healthInfo.stroke_history}"]`).checked = true;
+            // 생년월일
+            if (healthInfo.birth_date) {
+                document.getElementById('birth_date').value = healthInfo.birth_date;
             }
-            if (healthInfo.hypertension !== undefined) {
-                document.querySelector(`input[name="hypertension"][value="${healthInfo.hypertension}"]`).checked = true;
+            
+            // 키
+            if (healthInfo.height_cm) {
+                document.getElementById('height_cm').value = healthInfo.height_cm;
             }
-            if (healthInfo.heart_disease !== undefined) {
-                document.querySelector(`input[name="heart_disease"][value="${healthInfo.heart_disease}"]`).checked = true;
+            
+            // 흡연 이력 라디오 버튼
+            if (healthInfo.smoking_history) {
+                const smokingRadio = document.querySelector(`input[name="smoking_history"][value="${healthInfo.smoking_history}"]`);
+                if (smokingRadio) smokingRadio.checked = true;
             }
-            if (healthInfo.diabetes !== undefined) {
-                document.querySelector(`input[name="diabetes"][value="${healthInfo.diabetes}"]`).checked = true;
+            
+            // 질병 이력 체크박스
+            if (healthInfo.stroke_history) {
+                document.querySelector('input[name="stroke_history"]').checked = true;
+            }
+            if (healthInfo.hypertension) {
+                document.querySelector('input[name="hypertension"]').checked = true;
+            }
+            if (healthInfo.heart_disease) {
+                document.querySelector('input[name="heart_disease"]').checked = true;
+            }
+            if (healthInfo.diabetes) {
+                document.querySelector('input[name="diabetes"]').checked = true;
             }
         }
     } catch (error) {
@@ -261,14 +263,14 @@ async function handleBasicInfoSubmit(event) {
     
     const formData = {
         id: user.id,
-        sex: document.getElementById('sex').value,
+        sex: document.querySelector('input[name="sex"]:checked').value,
         birth_date: document.getElementById('birth_date').value,
         height_cm: parseInt(document.getElementById('height_cm').value),
-        stroke_history: document.querySelector('input[name="stroke_history"]:checked').value === 'true',
-        hypertension: document.querySelector('input[name="hypertension"]:checked').value === 'true',
-        heart_disease: document.querySelector('input[name="heart_disease"]:checked').value === 'true',
-        smoking_history: document.getElementById('smoking_history').value,
-        diabetes: document.querySelector('input[name="diabetes"]:checked').value === 'true'
+        smoking_history: document.querySelector('input[name="smoking_history"]:checked').value,
+        stroke_history: document.querySelector('input[name="stroke_history"]').checked,
+        hypertension: document.querySelector('input[name="hypertension"]').checked,
+        heart_disease: document.querySelector('input[name="heart_disease"]').checked,
+        diabetes: document.querySelector('input[name="diabetes"]').checked
     };
     
     try {
