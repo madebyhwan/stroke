@@ -2,17 +2,35 @@
 <script>
     
 // 환자용 모니터링 알림 기능
-// 대기 중인 모니터링 요청 확인
+// 대기 중인 모니터링 요청 확인 + 새로운 메모 확인
 async function checkPendingRequests() {
     try {
         const user = storage.get('user');
         if (!user || !user.id) return;
         
+        // 모니터링 요청 확인
         const requests = await apiCall(`/monitoring/requests/pending/${user.id}`, 'GET');
+        
+        // 읽지 않은 메모 확인 (마지막 확인 시간 이후의 메모)
+        const lastMemoCheck = storage.get('lastMemoCheck') || 0;
+        let hasNewMemos = false;
+        
+        try {
+            const memos = await apiCall(`/memos?patient_id=${user.id}`, 'GET');
+            if (memos && memos.length > 0) {
+                // 마지막 확인 시간 이후 새 메모가 있는지 체크
+                hasNewMemos = memos.some(memo => {
+                    const memoTime = new Date(memo.created_at).getTime();
+                    return memoTime > lastMemoCheck;
+                });
+            }
+        } catch (error) {
+            console.log('메모 확인 오류:', error);
+        }
         
         const badge = document.getElementById('notificationBadge');
         if (badge) {
-            if (requests && requests.length > 0) {
+            if ((requests && requests.length > 0) || hasNewMemos) {
                 badge.classList.remove('hidden');
             } else {
                 badge.classList.add('hidden');
@@ -27,54 +45,115 @@ async function checkPendingRequests() {
 async function showNotifications() {
     try {
         const user = storage.get('user');
+        
+        // 모니터링 요청 조회
         const requests = await apiCall(`/monitoring/requests/pending/${user.id}`, 'GET');
+        
+        // 새로운 메모 조회
+        const lastMemoCheck = storage.get('lastMemoCheck') || 0;
+        let newMemos = [];
+        
+        try {
+            const allMemos = await apiCall(`/memos?patient_id=${user.id}`, 'GET');
+            if (allMemos && allMemos.length > 0) {
+                newMemos = allMemos.filter(memo => {
+                    const memoTime = new Date(memo.created_at).getTime();
+                    return memoTime > lastMemoCheck;
+                });
+            }
+        } catch (error) {
+            console.log('메모 조회 오류:', error);
+        }
+        
+        const hasNotifications = (requests && requests.length > 0) || (newMemos && newMemos.length > 0);
         
         const modalHtml = `
             <div id="notificationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
                     <div class="p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-bold text-gray-800">모니터링 요청</h3>
+                            <h3 class="text-xl font-bold text-gray-800">알림</h3>
                             <button onclick="closeNotifications()" class="text-gray-400 hover:text-gray-600">
                                 <i data-lucide="x" class="w-6 h-6"></i>
                             </button>
                         </div>
                         <div class="space-y-3">
-                            ${requests && requests.length > 0 ? requests.map(req => `
-                                <div class="border border-gray-200 rounded-xl p-4">
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-semibold text-gray-800">${req.requester_name}</h4>
-                                                <p class="text-xs text-gray-500">${req.requester_role === 'DOCTOR' ? '의사' : '보호자'}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mb-3">건강 데이터 모니터링을 요청했습니다.</p>
-                                    <div class="flex gap-2">
-                                        <button 
-                                            onclick="handleApproveRequest('${req.id}', true)"
-                                            class="flex-1 bg-teal-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition"
-                                        >
-                                            승인
-                                        </button>
-                                        <button 
-                                            onclick="handleApproveRequest('${req.id}', false)"
-                                            class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
-                                        >
-                                            거부
-                                        </button>
-                                    </div>
-                                </div>
-                            `).join('') : `
+                            ${!hasNotifications ? `
                                 <div class="text-center py-8 text-gray-400">
                                     <i data-lucide="bell-off" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
                                     <p class="text-sm">새로운 알림이 없습니다</p>
                                 </div>
-                            `}
+                            ` : ''}
+                            
+                            ${newMemos && newMemos.length > 0 ? `
+                                <div class="mb-4">
+                                    <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <i data-lucide="mail" class="w-4 h-4 text-blue-600"></i>
+                                        새로운 메모 (${newMemos.length})
+                                    </h4>
+                                    ${newMemos.map(memo => `
+                                        <div class="border border-blue-200 bg-blue-50 rounded-xl p-4 mb-2">
+                                            <div class="flex items-start justify-between mb-2">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                                        <i data-lucide="stethoscope" class="w-4 h-4 text-blue-600"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-gray-800">${memo.doctor_id}</p>
+                                                        <p class="text-xs text-gray-500">${formatDateTime(memo.created_at)}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-sm text-gray-700 whitespace-pre-wrap">${memo.content}</p>
+                                            <button 
+                                                onclick="viewAllMemos('${memo.doctor_id}')"
+                                                class="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                            >
+                                                모든 메모 보기 →
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${requests && requests.length > 0 ? `
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <i data-lucide="user-plus" class="w-4 h-4 text-teal-600"></i>
+                                        모니터링 요청 (${requests.length})
+                                    </h4>
+                                    ${requests.map(req => `
+                                        <div class="border border-gray-200 rounded-xl p-4 mb-2">
+                                            <div class="flex items-start justify-between mb-3">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                                                        <i data-lucide="user-plus" class="w-5 h-5 text-teal-600"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="font-semibold text-gray-800">${req.requester_name}</h4>
+                                                        <p class="text-xs text-gray-500">${req.requester_role === 'DOCTOR' ? '의사' : '보호자'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mb-3">건강 데이터 모니터링을 요청했습니다.</p>
+                                            <div class="flex gap-2">
+                                                <button 
+                                                    onclick="handleApproveRequest('${req.id}', true)"
+                                                    class="flex-1 bg-teal-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition"
+                                                >
+                                                    승인
+                                                </button>
+                                                <button 
+                                                    onclick="handleApproveRequest('${req.id}', false)"
+                                                    class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
+                                                >
+                                                    거부
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -103,6 +182,27 @@ function closeNotifications() {
         modal.remove();
     }
     document.body.style.overflow = '';
+}
+
+// 알림에서 모든 메모 보기 (모니터링 페이지로 이동)
+function viewAllMemos(doctorId) {
+    closeNotifications();
+    // 마지막 확인 시간 업데이트
+    storage.set('lastMemoCheck', Date.now());
+    checkPendingRequests();
+    // 모니터링 페이지로 이동
+    window.location.href = '/patient/my-monitors';
+}
+
+// 날짜/시간 포맷 함수
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
 }
 
 // 모니터링 요청 승인/거부

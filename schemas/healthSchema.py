@@ -3,6 +3,7 @@
 
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 class HealthRecordInput(BaseModel):
     """건강 측정 데이터 입력"""
@@ -17,3 +18,5 @@ class HealthRecordResponse(HealthRecordInput):
     """건강 측정 데이터 응답"""
     id: str
     created_at: datetime
+    stroke_risk_score: Optional[float] = None  # 뇌졸중 위험도 점수
+    stroke_risk_level: Optional[str] = None    # 위험도 등급

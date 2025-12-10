@@ -156,17 +156,18 @@ function displayMonitors(relations) {
         
         return `
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4 flex-1 cursor-pointer" onclick="showMemoModal('${relation.monitor_id}', '${relation.monitor_name}', '${relation.monitor_role}')">
                     <div class="w-12 h-12 bg-${roleColor}-100 rounded-full flex items-center justify-center">
                         <i data-lucide="${icon}" class="w-6 h-6 text-${roleColor}-600"></i>
                     </div>
                     <div>
                         <h4 class="font-semibold text-gray-800">${relation.monitor_name}</h4>
                         <p class="text-xs text-gray-500">${roleText} · ${formatDate(relation.granted_at)} 승인</p>
+                        ${relation.monitor_role === 'DOCTOR' ? '<p class="text-xs text-blue-600 mt-1">클릭하여 메모 확인</p>' : ''}
                     </div>
                 </div>
                 <button 
-                    onclick="showRemoveModal('${relation.id}', '${relation.monitor_name}')"
+                    onclick="event.stopPropagation(); showRemoveModal('${relation.id}', '${relation.monitor_name}')"
                     class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
                     title="모니터링 해제"
                 >
@@ -322,6 +323,107 @@ async function confirmRemove() {
     } catch (error) {
         showAlert(error.message || '해제에 실패했습니다.', 'error');
     }
+}
+
+// 메모 모달 표시
+async function showMemoModal(doctorId, doctorName, role) {
+    if (role !== 'DOCTOR') {
+        return; // 의사가 아니면 메모 없음
+    }
+    
+    const user = storage.get('user');
+    
+    try {
+        // 의사가 환자에게 작성한 메모 조회
+        const memos = await apiCall(`/memos?doctor_id=${doctorId}&patient_id=${user.id}`, 'GET');
+        
+        // 메모 확인 시간 업데이트
+        storage.set('lastMemoCheck', Date.now());
+        checkPendingRequests(); // 알림 배지 업데이트
+        
+        const modalHtml = `
+            <div id="memoModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-white p-6 border-b border-gray-200 rounded-t-2xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">${doctorName} 의사</h3>
+                                <p class="text-sm text-gray-500 mt-1">전달 받은 메모</p>
+                            </div>
+                            <button onclick="closeMemoModal()" class="text-gray-400 hover:text-gray-600">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            ${memos && memos.length > 0 ? memos.map(memo => `
+                                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <i data-lucide="stethoscope" class="w-3 h-3 text-blue-600"></i>
+                                            </div>
+                                            <span class="text-xs font-medium text-blue-700">${doctorName}</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500">${formatDateTime(memo.created_at)}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">${memo.content}</p>
+                                </div>
+                            `).join('') : `
+                                <div class="text-center py-8">
+                                    <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mx-auto mb-2"></i>
+                                    <p class="text-sm text-gray-500">받은 메모가 없습니다</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 기존 모달 제거
+        const existingModal = document.getElementById('memoModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        document.body.style.overflow = 'hidden';
+        lucide.createIcons();
+        
+    } catch (error) {
+        console.error('메모 로드 오류:', error);
+        showAlert('메모를 불러올 수 없습니다.', 'error');
+    }
+}
+
+// 메모 모달 닫기
+function closeMemoModal() {
+    const modal = document.getElementById('memoModal');
+    if (modal) {
+        modal.remove();
+    }
+    document.body.style.overflow = '';
+}
+
+// 날짜 포맷 함수
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
 }
 </script>
 {% endblock %}

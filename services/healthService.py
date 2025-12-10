@@ -4,14 +4,43 @@
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from schemas.healthSchema import HealthRecordInput, HealthRecordResponse
 from models.healthModel import HealthRecordDB
-from crud import healthCrud
+from crud import healthCrud, userCrud
+from core.riskCalculator import calculate_stroke_risk, get_risk_level, calculate_age
 from typing import Optional, List
 from bson import ObjectId
 from datetime import datetime
 
 # 건강 기록 생성
 async def create_health_record(db: AsyncIOMotorDatabase, health_input: HealthRecordInput) -> HealthRecordResponse:
-    """새로운 건강 기록 생성 (시계열 측정 데이터)"""
+    """새로운 건강 기록 생성 (시계열 측정 데이터) + 위험도 계산"""
+    
+    # 사용자 정보 조회 (위험도 계산을 위해 필요)
+    user = await userCrud.get_user_by_id(db, health_input.user_id)
+    if not user:
+        raise ValueError("사용자를 찾을 수 없습니다.")
+    
+    # 나이 계산
+    age = calculate_age(user.birth_date) if user.birth_date else 50
+    
+    # 위험도 계산
+    risk_score = calculate_stroke_risk(
+        age=age,
+        sex=user.sex.value if hasattr(user.sex, 'value') else user.sex,
+        stroke_history=user.stroke_history,
+        hypertension=user.hypertension,
+        heart_disease=user.heart_disease,
+        diabetes=user.diabetes,
+        smoking_history=user.smoking_history.value if hasattr(user.smoking_history, 'value') else user.smoking_history,
+        systolic_bp=health_input.systolic_bp,
+        diastolic_bp=health_input.diastolic_bp,
+        weight_kg=health_input.weight_kg,
+        height_cm=user.height_cm,
+        glucose_level=health_input.glucose_level,
+        smoking=health_input.smoking
+    )
+    
+    risk_level = get_risk_level(risk_score)
+    
     # HealthRecordDB 모델로 변환
     health_db = HealthRecordDB(
         id=str(ObjectId()),
@@ -21,6 +50,8 @@ async def create_health_record(db: AsyncIOMotorDatabase, health_input: HealthRec
         diastolic_bp=health_input.diastolic_bp,
         glucose_level=health_input.glucose_level,
         smoking=health_input.smoking,
+        stroke_risk_score=risk_score,
+        stroke_risk_level=risk_level,
         created_at=datetime.now()
     )
     
@@ -36,6 +67,8 @@ async def create_health_record(db: AsyncIOMotorDatabase, health_input: HealthRec
         diastolic_bp=created.diastolic_bp,
         glucose_level=created.glucose_level,
         smoking=created.smoking,
+        stroke_risk_score=created.stroke_risk_score,
+        stroke_risk_level=created.stroke_risk_level,
         created_at=created.created_at
     )
 
@@ -53,6 +86,8 @@ async def get_user_health_records(db: AsyncIOMotorDatabase, user_id: str) -> Lis
             diastolic_bp=h.diastolic_bp,
             glucose_level=h.glucose_level,
             smoking=h.smoking,
+            stroke_risk_score=h.stroke_risk_score,
+            stroke_risk_level=h.stroke_risk_level,
             created_at=h.created_at
         )
         for h in health_list
@@ -73,6 +108,8 @@ async def get_latest_health_record(db: AsyncIOMotorDatabase, user_id: str) -> Op
         diastolic_bp=latest.diastolic_bp,
         glucose_level=latest.glucose_level,
         smoking=latest.smoking,
+        stroke_risk_score=latest.stroke_risk_score,
+        stroke_risk_level=latest.stroke_risk_level,
         created_at=latest.created_at
     )
 
@@ -91,6 +128,8 @@ async def delete_health_record(db: AsyncIOMotorDatabase, record_id: str) -> Opti
         diastolic_bp=deleted_record.diastolic_bp,
         glucose_level=deleted_record.glucose_level,
         smoking=deleted_record.smoking,
+        stroke_risk_score=deleted_record.stroke_risk_score,
+        stroke_risk_level=deleted_record.stroke_risk_level,
         created_at=deleted_record.created_at
     )
 

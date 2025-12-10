@@ -28,36 +28,30 @@
     </div>
 
     <!-- 뇌졸중 위험도 카드 -->
-    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-teal-100">
+        <!-- 헤더: 제목과 현재 위험도 -->
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">현재 뇌졸중 위험도</h3>
-            <i data-lucide="target" class="w-5 h-5 text-teal-600"></i>
+            <div class="flex items-center gap-2">
+                <i data-lucide="activity" class="w-5 h-5 text-teal-600"></i>
+                <h3 class="text-lg font-bold text-gray-800">나의 뇌졸중 위험도</h3>
+            </div>
+            <div class="text-right">
+                <div class="flex items-baseline justify-end gap-1">
+                    <span class="text-2xl font-bold text-right" id="riskScore">-</span>
+                </div>
+                <p class="text-xs font-medium mt-0.5" id="riskStatus">데이터 입력 필요</p>
+            </div>
         </div>
         
-        <div id="riskScoreContainer" class="text-center py-8">
-            <div class="relative inline-block">
-                <svg class="w-32 h-32 transform -rotate-90">
-                    <circle cx="64" cy="64" r="56" stroke="#e5e7eb" stroke-width="8" fill="none"></circle>
-                    <circle 
-                        id="riskCircle"
-                        cx="64" 
-                        cy="64" 
-                        r="56" 
-                        stroke="#8b5cf6" 
-                        stroke-width="8" 
-                        fill="none"
-                        stroke-dasharray="351.86"
-                        stroke-dashoffset="351.86"
-                        class="transition-all duration-1000"
-                    ></circle>
-                </svg>
-                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <div class="text-3xl font-bold text-teal-600" id="riskScore">-</div>
-                    <div class="text-xs text-gray-500">위험도</div>
-                </div>
+        <!-- 위험도 추이 그래프 (전체 너비) -->
+        <div class="bg-white rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs text-gray-500">최근 추이</p>
+                <p class="text-xs text-gray-400" id="riskDate"></p>
             </div>
-            <p class="text-sm text-gray-600 mt-4" id="riskStatus">데이터를 입력하고 위험도를 확인하세요</p>
-            <p class="text-xs text-gray-500 mt-2" id="riskDate"></p>
+            <div class="relative h-48">
+                <canvas id="riskTrendChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -172,9 +166,12 @@ async function refreshData() {
         displayRecordsList(records);
         
         // 최신 위험도 표시
-        if (records.length > 0 && records[0].stroke_risk_score !== undefined) {
+        if (records.length > 0 && records[0].stroke_risk_score !== undefined && records[0].stroke_risk_score !== null) {
             displayRiskScore(records[0].stroke_risk_score, records[0].created_at);
         }
+        
+        // 위험도 추이 그래프 표시
+        displayRiskTrendChart(records);
         
     } catch (error) {
         console.error('데이터 로드 오류:', error);
@@ -225,9 +222,9 @@ function displayRecordsList(records) {
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-800">${formatDate(record.created_at)}</p>
-                        ${record.stroke_risk_score !== undefined ? 
-                            `<p class="text-xs text-teal-600 font-semibold">위험도: ${record.stroke_risk_score.toFixed(1)}%</p>` : 
-                            ''}
+                        ${record.stroke_risk_score !== undefined && record.stroke_risk_score !== null ? 
+                            `<p class="text-xs text-teal-600 font-semibold">위험도: ${record.stroke_risk_score.toFixed(1)}</p>` : 
+                            '<p class="text-xs text-gray-400">위험도: 계산 중</p>'}
                     </div>
                 </div>
                 <button onclick="deleteRecord('${record.id}')" class="text-red-500 hover:text-red-700">
@@ -262,29 +259,151 @@ function displayRiskScore(score, date) {
     const scoreElement = document.getElementById('riskScore');
     const statusElement = document.getElementById('riskStatus');
     const dateElement = document.getElementById('riskDate');
-    const circleElement = document.getElementById('riskCircle');
     
-    scoreElement.textContent = score.toFixed(1) + '%';
-    dateElement.textContent = '측정일: ' + formatDate(date);
-    
-    // 원형 진행바 업데이트
-    const circumference = 351.86;
-    const offset = circumference - (score / 100) * circumference;
-    circleElement.style.strokeDashoffset = offset;
-    
-    if (score < 5) {
-        statusElement.textContent = '✅ 낮은 위험도 - 건강한 상태입니다!';
-        statusElement.className = 'text-sm text-green-600 font-medium mt-4';
-        circleElement.setAttribute('stroke', '#10b981');
-    } else if (score < 10) {
-        statusElement.textContent = '⚠️ 보통 위험도 - 건강 관리에 주의하세요';
-        statusElement.className = 'text-sm text-yellow-600 font-medium mt-4';
-        circleElement.setAttribute('stroke', '#f59e0b');
-    } else {
-        statusElement.textContent = '🚨 높은 위험도 - 의료진 상담이 필요합니다';
-        statusElement.className = 'text-sm text-red-600 font-medium mt-4';
-        circleElement.setAttribute('stroke', '#ef4444');
+    // null 체크
+    if (score === null || score === undefined) {
+        scoreElement.textContent = '-';
+        statusElement.textContent = '위험도 계산이 필요합니다';
+        dateElement.textContent = '';
+        return;
     }
+    
+    scoreElement.textContent = score.toFixed(1);
+    dateElement.textContent = formatDate(date);
+    
+    // 백엔드 기준: 0-20: 낮음, 20-40: 보통, 40-60: 높음, 60+: 매우 높음
+    if (score < 20) {
+        statusElement.textContent = '낮은 위험도';
+        scoreElement.className = 'text-2xl font-bold text-green-600 text-right';
+    } else if (score < 40) {
+        statusElement.textContent = '보통 위험도';
+        scoreElement.className = 'text-2xl font-bold text-yellow-600 text-right';
+    } else if (score < 60) {
+        statusElement.textContent = '높은 위험도';
+        scoreElement.className = 'text-2xl font-bold text-orange-600 text-right';
+    } else {
+        statusElement.textContent = '매우 높은 위험도';
+        scoreElement.className = 'text-2xl font-bold text-red-600 text-right';
+    }
+}
+
+// 위험도 추이 그래프
+let riskTrendChart = null;
+
+function displayRiskTrendChart(records) {
+    const ctx = document.getElementById('riskTrendChart');
+    if (!ctx) return;
+    
+    // 위험도가 있는 레코드만 필터링 (최대 7개)
+    const recordsWithRisk = records
+        .filter(r => r.stroke_risk_score !== null && r.stroke_risk_score !== undefined)
+        .slice(0, 7)
+        .reverse(); // 오래된 것부터 표시
+    
+    if (recordsWithRisk.length === 0) {
+        ctx.parentElement.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">위험도 데이터가 없습니다</p>';
+        return;
+    }
+    
+    // 기존 차트 제거
+    if (riskTrendChart) {
+        riskTrendChart.destroy();
+    }
+    
+    // 날짜 레이블 생성
+    const labels = recordsWithRisk.map(r => {
+        const date = new Date(r.created_at);
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+    });
+    
+    // 위험도 데이터
+    const riskScores = recordsWithRisk.map(r => r.stroke_risk_score);
+    
+    // 배경색 설정 (위험도에 따라)
+    const backgroundColors = riskScores.map(score => {
+        if (score < 20) return 'rgba(16, 185, 129, 0.2)'; // 녹색
+        if (score < 40) return 'rgba(245, 158, 11, 0.2)'; // 노란색
+        if (score < 60) return 'rgba(249, 115, 22, 0.2)'; // 주황색
+        return 'rgba(239, 68, 68, 0.2)'; // 빨간색
+    });
+    
+    
+    riskTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: riskScores,
+                backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                borderColor: 'rgb(20, 184, 166)',
+                borderWidth: 2.5,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: riskScores.map(score => {
+                    if (score < 20) return 'rgb(16, 185, 129)';
+                    if (score < 40) return 'rgb(245, 158, 11)';
+                    if (score < 60) return 'rgb(249, 115, 22)';
+                    return 'rgb(239, 68, 68)';
+                }),
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 8,
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
+                        label: function(context) {
+                            return '위험도: ' + context.parsed.y.toFixed(1);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    display: true,
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        display: true,
+                        font: {
+                            size: 10
+                        },
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    display: true,
+                    ticks: {
+                        font: {
+                            size: 10
+                        },
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
 }
 
 async function deleteRecord(recordId) {

@@ -48,7 +48,7 @@ app.add_middleware(
 app.include_router(userController.router, prefix="/users", tags=["Users"])
 app.include_router(healthController.router, prefix="/health", tags=["Health"])
 app.include_router(monitoringController.router, prefix="/monitoring", tags=["Monitoring"])
-# app.include_router(memoController.router, prefix="/memos", tags=["Memos"])
+app.include_router(memoController.router, prefix="/memos", tags=["Memos"])
 
 # 루트 엔드포인트
 @app.get("/", response_class=HTMLResponse)
